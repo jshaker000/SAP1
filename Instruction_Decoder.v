@@ -93,7 +93,7 @@ module Instruction_Decoder (
   output wire                     o_programcnto;  // Program Counter Out
   output wire                     o_jump;         // Jump
 
-  reg  [CONTROL_WORD_WIDTH-1:0] control_word;
+  wire   [CONTROL_WORD_WIDTH-1:0] control_word;
 
   assign o_halt         = control_word[HLT_ADDR];
   assign o_adv          = control_word[ADV_ADDR];
@@ -113,112 +113,58 @@ module Instruction_Decoder (
   assign o_programcnto  = control_word[CO_ADDR];
   assign o_jump         = control_word[J_ADDR];
 
-  always @(*) begin
-    case (i_instruction)
-      'h1 : // LDA
-        case (i_step)
-          'h0    : control_word = c_MI | c_CO;
-          'h1    : control_word = c_RO | c_II | c_CE;
-          'h2    : control_word = c_IO | c_MI;
-          'h3    : control_word = c_RO | c_AI;
-          default: control_word = c_ADV;
-        endcase
-      'h2    : // ADD
-        case (i_step)
-          'h0    : control_word = c_MI | c_CO;
-          'h1    : control_word = c_RO | c_II | c_CE;
-          'h2    : control_word = c_IO | c_MI;
-          'h3    : control_word = c_RO | c_BI;
-          'h4    : control_word = c_EO | c_AI | c_EL;
-          default: control_word = c_ADV;
-        endcase
-      'h3    : // SUBTRACT
-        case (i_step)
-          'h0    : control_word = c_MI | c_CO;
-          'h1    : control_word = c_RO | c_II | c_CE;
-          'h2    : control_word = c_IO | c_MI;
-          'h3    : control_word = c_RO | c_BI;
-          'h4    : control_word = c_EO | c_AI | c_SU | c_EL;
-          default: control_word = c_ADV;
-        endcase
-      'h4    : // LDI
-        case (i_step)
-          'h0    : control_word = c_MI | c_CO;
-          'h1    : control_word = c_RO | c_II | c_CE;
-          'h2    : control_word = c_IO | c_AI;
-          default: control_word = c_ADV;
-        endcase
-      'h5    : // ADDI
-        case (i_step)
-          'h0    : control_word = c_MI | c_CO;
-          'h1    : control_word = c_RO | c_II | c_CE;
-          'h2    : control_word = c_IO | c_BI;
-          'h3    : control_word = c_EO | c_AI | c_EL;
-          default: control_word = c_ADV;
-        endcase
-      'h6    : // SUBTRACTI
-        case (i_step)
-          'h0    : control_word = c_MI | c_CO;
-          'h1    : control_word = c_RO | c_II | c_CE;
-          'h2    : control_word = c_IO | c_BI;
-          'h3    : control_word = c_EO | c_AI | c_SU | c_EL;
-          default: control_word = c_ADV;
-        endcase
-      'h7    : // STA
-        case (i_step)
-          'h0    : control_word = c_MI | c_CO;
-          'h1    : control_word = c_RO | c_II | c_CE;
-          'h2    : control_word = c_IO | c_MI;
-          'h3    : control_word = c_AO | c_RI;
-          default: control_word = c_ADV;
-        endcase
-      'h8    : // JMP
-        case (i_step)
-          'h0    : control_word = c_MI | c_CO;
-          'h1    : control_word = c_RO | c_II | c_CE;
-          'h2    : control_word = c_IO | c_J;
-          default: control_word = c_ADV;
-        endcase
-      'h9    : // JIZ
-        case (i_step)
-          'h0    : control_word = c_MI | c_CO;
-          'h1    : control_word = c_RO | c_II | c_CE;
-          'h2    : control_word = i_zero ? (c_IO | c_J) : c_ADV;
-          default: control_word = c_ADV;
-        endcase
-      'ha    : // JIC
-        case (i_step)
-          'h0    : control_word = c_MI | c_CO;
-          'h1    : control_word = c_RO | c_II | c_CE;
-          'h2    : control_word = i_carry ? (c_IO | c_J) : c_ADV;
-          default: control_word = c_ADV;
-        endcase
-      'hb    : // JIO
-        case (i_step)
-          'h0    : control_word = c_MI | c_CO;
-          'h1    : control_word = c_RO | c_II | c_CE;
-          'h2    : control_word = i_odd ? (c_IO | c_J)   : c_ADV;
-          default: control_word = c_ADV;
-        endcase
-      'he    : // OUT
-        case (i_step)
-          'h0    : control_word = c_MI | c_CO;
-          'h1    : control_word = c_RO | c_II | c_CE;
-          'h2    : control_word = c_AO | c_OI;
-          default: control_word = c_ADV;
-        endcase
-      'hf    : // HLT
-        case (i_step)
-          default: control_word = c_HLT;
-        endcase
-      default:     // NOP - in this case 'h0, 'hc, 'hd,  You can add instructions to c,d to make nop just 0 or you could program over 0
-                   // too to elimate NOP entirely
-        case (i_step)
-          'h0    : control_word = c_MI | c_CO;
-          'h1    : control_word = c_RO | c_II | c_CE;
-          default: control_word = c_ADV;
-        endcase
-    endcase
-  end
+  assign control_word = // fetch, put prgm cntr in mem addr, fetch instruction, advance PC. All instructions start
+                 i_step == 'h0 ? c_MI | c_CO        :
+                 i_step == 'h1 ? c_RO | c_II | c_CE :
+                // i_instruction == 'h0 ? // unimplement - defaults at bottom to NOP
+                   i_instruction == 'h1 ? // LDA - put data in RAM addr in A
+                     i_step == 'h2      ? c_IO | c_MI        :
+                     i_step == 'h3      ? c_RO | c_AI        :
+                     c_ADV :
+                    i_instruction == 'h2 ? // ADD - add data from RAM addr to A
+                      i_step == 'h2      ? c_IO | c_MI        :
+                      i_step == 'h3      ? c_RO | c_BI        :
+                      i_step == 'h4      ? c_EO | c_AI | c_EL :
+                      c_ADV :
+                    i_instruction == 'h3 ? // SUBTRACT - subtract data from RAM addr to A
+                      i_step == 'h2      ? c_IO | c_MI        :
+                      i_step == 'h3      ? c_RO | c_BI        :
+                      i_step == 'h4      ? c_EO | c_SU | c_AI | c_EL :
+                      c_ADV :
+                    i_instruction == 'h4 ? // LDI - load an immediate 4 bit value to A
+                      i_step == 'h2      ? c_IO | c_AI        :
+                      c_ADV :
+                    i_instruction == 'h5 ? // ADDI - add an immediate 4 bit value to A
+                      i_step == 'h2      ? c_IO | c_BI        :
+                      i_step == 'h3      ? c_EO | c_AI | c_EL :
+                      c_ADV :
+                    i_instruction == 'h6 ? // SUBTRACTI - subtract an immediate 4 bit value from A
+                      i_step == 'h2      ? c_IO | c_BI        :
+                      i_step == 'h3      ? c_EO | c_SU | c_AI | c_EL :
+                      c_ADV :
+                    i_instruction == 'h7 ? // STA - store A in RAM
+                      i_step == 'h2      ? c_IO | c_MI :
+                      i_step == 'h3      ? c_AO | c_RI :
+                      c_ADV :
+                    i_instruction == 'h8 ? // JMP - jump to ADDR
+                      i_step == 'h2      ? c_IO | c_J  :
+                      c_ADV :
+                    i_instruction == 'h9 ? // JIZ - jump to ADDR if last ALU op was 0
+                      i_step == 'h2      ? i_zero  ? (c_IO | c_J) : c_ADV :
+                      c_ADV :
+                    i_instruction == 'ha ? // JIC - jump to ADDR if last ALU op carried
+                      i_step == 'h2      ? i_carry ? (c_IO | c_J) : c_ADV :
+                      c_ADV :
+                    i_instruction == 'hb ? // JIO - jump to ADDR if last ALU op was odd
+                      i_step == 'h2      ? i_odd   ? (c_IO | c_J) : c_ADV :
+                      c_ADV :
+                 // i_instruction == 'hc ? // unimplement - defaults at bottom to NOP
+                 // i_instruction == 'hd ? // unimplement - defaults at bottom to NOP
+                    i_instruction == 'he ? // OUT - copy Areg to out reg
+                      i_step == 'h2      ? c_AO | c_OI :
+                      c_ADV :
+                    i_instruction == 'hf ? // HALT PROGRAM
+                      c_HLT :
+                    c_ADV;                 // NOP - do nothing and just advance counter
 
 endmodule
