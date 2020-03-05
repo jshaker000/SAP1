@@ -10,39 +10,6 @@ and I hope that this finds someone else whose intrigued and finds it helpful.
 
 The bench is written in C++ and is compiled using [Verilator](https://www.veripool.org/wiki/verilator).
 
-## Verilog Background
-
-Verilog is an HDL (Hardware Description language). This means that you write "code" to describe
-combinatorial and sequential nets. You should think as a hardware designer when you write Verilog and
-should have some sense as to how your design will look in gates & flops & rams.
-
-Verilog is built around the idea of a "module", which you can think of as a black box circuit. You define
-the in ports and the out ports to the circuit and then can make instances of it elsewhere in your design.
-These are analogous to the pins of an IC. Inside, you define the relationships of the inports and out ports.
-
-You can also parameterize your modules - which means you can make several versions of it with different widths, for example.
-Those can be defined by whoever instantiates the module.
-
-Verilog has the idea of "wires" - which are combinational logic, and registers which are (usually) sequential logic.
-
-I like to use the "ternary operator" like a mux, ie
-
-    wire mux = (sel == 1'b0) ? a0 : a1;
-
-This kind of logic is nice because I can visualize it very well, as opposed to if statements (especially when you
-dont have parity betweeen them), but it is a lot of personal preference.
-
-You can use similar logic for a register to only update it at "load"
-
-    register r;
-    always @(posedge mclk) r <= load ? load_data : r;
-    
-Note that assigning r to itself really just means we wont load in a new value this clock.
-You cannot do this on a wire, a wire must always have something assigned to it (there cant be circular
-combinational logic).
-
-Hopefully thats enough to atleast start reading the code, but verilog is so deep that its impossible to cover much here.
-
 ## Tweaks from Ben's Machine
 There are some modifications I made to make it more simulatable and easier for me to work with.
 (I also think I changed some op codes but these are easy enough to figure out)
@@ -56,7 +23,7 @@ ever be high so it's really identical functionally to the tri-state implementati
 ### Clock Enable
 I added a Clock Enable line. The idea is that if someone wants to synthesize and put this on a
 real FPGA the clock would be far too fast. So you can use the Clock Enable Module to divide the
-clock, or if you are comfortable with synchronizers and debouncing tomanually toggle the clock.
+clock, or if you are comfortable with synchronizers and debouncing to manually toggle the clock.
 It is safer to send the clock everywhere with an enable then to gate the clock directly using gates.
 
 ### ADV Microinstruction
@@ -113,7 +80,3 @@ wheter we are on an even or odd clock and alternating appropriately between "rea
 ## Screenshots
 
 ![Emulator Example](/screenshots/emulator_example.png?raw=true)
-
-## Further Reading
-I learned a lot about verilator and verilog from [ZipCpu](https://zipcpu.com/tutorial/), so I recommend
-everyone to check out their blog as a first step.
