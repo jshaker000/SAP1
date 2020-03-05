@@ -65,6 +65,9 @@ I'd like to modify the C++ program so I can run
     USE_GUI=0 GEN_TRACES=1 make
 
 Or something like that, rather than recompiling. I can't imagine that being too hard.
+### Clock Strategies
+There is the weird counter that works on negative edges. It might be better to count even/odd clocks or come up with some
+different strategy for that counter in particular. It probably would be pretty easy - it just needs a bit of thinking.
 
 ### FPGA Implementation
 #### Output Module
@@ -72,6 +75,12 @@ I didnt want to go through the trouble of making a binary to bcd converter then 
 Also, each FPGA will have a different port config to drive the 7segs (shift registers, act high, act low).
 So that is an open excercise.
 Currently, I am able to synthesize this design on Vivado when I map out\_data to a handful of LEDs.
+#### Reset Line
+Some ability to reset everyhting -> perhaps also have  "backup ram (functionally rom)" and some bootstrapping module to copy the backup ram
+back into the main ram to easily restart
+#### UART RAM Programming
+Some way to reprogram the RAM from a computer so that we dont have to reelaborate and synthesisize and all each time.
+Obviously that wont cover RTL changes though.
 #### Clocking
 Eventually everything will need to be registered (most likely). This will change timing but it should be simple enough.
 I also want to remove the negedge triggered counter for instruction counter. That might require counting 
