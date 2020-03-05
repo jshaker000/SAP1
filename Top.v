@@ -83,7 +83,7 @@ module Top(
   wire                                         odd;
 
   // out data
-  wire                  [OUT_WIDTH-1:0] out_data;
+  wire                         [OUT_WIDTH-1:0] out_data;
 /*-------------------END INTERCONNECTS-----------------------------------*/
 
   Clock_Enable inst_Clock_Enable(

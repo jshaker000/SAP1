@@ -1,8 +1,3 @@
-// ALU can currently add or subtract
-// We need a control to latch the flags when an operation actually occurs,
-// otherwise they will constantly change if we load something in A or
-// something
-
 module ALU(
   mclk,
   mclk_en,

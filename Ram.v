@@ -9,6 +9,7 @@ module Ram(
 
   parameter  RAM_DEPTH  = 16;
   parameter  WIDTH      =  8;
+  parameter  FILE       = "ram.hex";
   localparam ADDR_WIDTH = $clog2(RAM_DEPTH);
 
   input                  mclk;
@@ -24,12 +25,11 @@ module Ram(
 
   // initialize ram with a hex file
   initial begin
-    $readmemh("ram.hex",ram);
+    $readmemh(FILE,ram);
   end
 
-  // should infer as ram but need to double check
-  // may need to register outputs
-  always @(posedge mclk) ram[i_address] <= write ? i_load_data : ram[i_address];
-  assign                        o_data   = ram[i_address];
+  always @(posedge mclk) ram[i_address] <= write ? i_load_data :
+                                           ram[i_address];
+  assign o_data   = ram[i_address];
 
 endmodule

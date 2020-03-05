@@ -20,8 +20,9 @@ module Out(
 
   output reg   [WIDTH-1:0] o_data = 0;
 
-  wire transition = mclk_en & i_load_enable;
+  wire load = mclk_en & i_load_enable;
 
-  always @(posedge mclk) o_data <= transition ? i_load_data : o_data;
+  always @(posedge mclk) o_data <= load ? i_load_data :
+                                   o_data;
 
 endmodule

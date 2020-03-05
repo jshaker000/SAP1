@@ -19,7 +19,7 @@ module Program_Counter(
 
   output [WIDTH-1:0] o_data;
 
-  reg    [WIDTH-1:0] counter = 'd0;
+  reg    [WIDTH-1:0] counter = {WIDTH{1'b0}};
 
   wire advance_counter       = mclk_en & i_counter_enable & ~i_halt & ~i_load_enable;
 
@@ -27,6 +27,6 @@ module Program_Counter(
                                     i_load_enable   ? i_load_data                     :
                                     counter;
 
-  assign                   o_data = counter;
+  assign o_data = counter;
 
 endmodule
