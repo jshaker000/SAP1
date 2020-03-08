@@ -188,7 +188,8 @@ module Top(
 
   Ram #(
     .RAM_DEPTH(RAM_DEPTH),
-    .WIDTH    (RAM_WIDTH)
+    .WIDTH    (RAM_WIDTH),
+    .FILE     ("ram.hex")
   ) inst_Ram (
     .mclk         (mclk),
     .mclk_en      (mclk_en),

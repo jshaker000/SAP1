@@ -18,7 +18,7 @@ module Out(
   input                    i_load_enable;
   input        [WIDTH-1:0] i_load_data;
 
-  output reg   [WIDTH-1:0] o_data = 0;
+  output reg   [WIDTH-1:0] o_data = {WIDTH{1'b0}};
 
   wire load = mclk_en & i_load_enable;
 

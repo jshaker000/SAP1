@@ -23,13 +23,12 @@ module Ram(
   reg        [WIDTH-1:0] ram [0:RAM_DEPTH-1];
   wire                   write = mclk_en & i_load_enable;
 
-  // initialize ram with a hex file
   initial begin
     $readmemh(FILE,ram);
   end
 
   always @(posedge mclk) ram[i_address] <= write ? i_load_data :
                                            ram[i_address];
-  assign o_data   = ram[i_address];
+  assign o_data = ram[i_address];
 
 endmodule

@@ -1,6 +1,7 @@
 // My verilog simulator does not do tristate logic
-// Instead, we will send all data to the bus and AND it with a MASK of it it
-// The bus will then OR reduce (only one thing should be non-zero) and output
+// Instead, we will send all data to the bus and AND it with a MASK of its valid
+// The bus will then OR reduce and output. At any given time, only one valid
+// should be high anyway so this works will
 
 module Bus(
   i_a_reg_out,
@@ -42,7 +43,7 @@ module Bus(
 
   output                [BUS_WIDTH-1:0] o_bus_out;
 
-  //left fill with 0's if need be, and mask with data
+  //left fill with 0's if need be, and mask with data with valids
   wire [BUS_WIDTH-1:0]a_reg_masked           =  {{BUS_WIDTH-A_REG_OUT_WIDTH{1'b0}},          i_a_reg_data}
                                                & {BUS_WIDTH{i_a_reg_out}};
   wire [BUS_WIDTH-1:0]b_reg_masked           =  {{BUS_WIDTH-B_REG_OUT_WIDTH{1'b0}},          i_b_reg_data}

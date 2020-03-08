@@ -1,3 +1,7 @@
+// Simple ALU that can add or subtrack.
+// Can optionally latch its flags, which can be used as inputs to the
+// Instruction decoding for JIZ instructions and the like,
+
 module ALU(
   mclk,
   mclk_en,

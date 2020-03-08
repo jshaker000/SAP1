@@ -1,7 +1,5 @@
-// Como_breginato_instrregnal net to deo_programcntode isntructions
-// May be easier to load fo_ramom a HEX file but it'll be vo_aluo_ramilog for now
-// I thoguht it was easiest to assign everything to "control word" and then
-// break out control word to where it needed to go for each output
+// Combinational module that takes program counter and instruction and ALU
+// flags and produces control logic
 
 module Instruction_Decoder (
   i_instruction,
@@ -113,7 +111,7 @@ module Instruction_Decoder (
   assign o_programcnto  = control_word[CO_ADDR];
   assign o_jump         = control_word[J_ADDR];
 
-  assign control_word = // fetch, put prgm cntr in mem addr, fetch instruction, advance PC. All instructions start
+  assign control_word = // fetch, put prgm cntr in mem addr, fetch instruction, advance PC. All instructions start like this
                  i_step == 'h0 ? c_MI | c_CO        :
                  i_step == 'h1 ? c_RO | c_II | c_CE :
                 // i_instruction == 'h0 ? // unimplement - defaults at bottom to NOP
