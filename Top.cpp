@@ -5,18 +5,13 @@
 
 #include <ncurses.h>
 
-#include <cassert>
 #include <cstdint>
+#include <cstdlib>
 
 #include <chrono>
-#include <fstream>
 #include <iostream>
 #include <string>
 #include <thread>
-
-
-static constexpr bool GEN_TRACES        = true;
-static constexpr bool USE_GUI           = true;
 
 static constexpr int   MIN_ROWS         = 35;
 static constexpr int   MIN_COLS         = 80;
@@ -29,40 +24,46 @@ static constexpr int   COLOR_READ_FROM_BUS = 3;
 static constexpr int   COLOR_WRITE_TO_INV   = 4;
 static constexpr int   COLOR_READ_FROM_INV  = 5;
 
-static double step_time_ms              = 1000.0/20.0;
+static double step_time_ms                  = 1000.0/20.0;
 
 // each draw function needs the window, the dimensions of the widnow, and the data
 static void draw_main               (WINDOW*,int,int);
 static void draw_clk                (WINDOW*,int,int,
-        uint64_t);
+        std::uint32_t);
 static void draw_control_word       (WINDOW*,int,int,
         bool,bool,bool,bool,bool,bool,bool,bool,
         bool,bool,bool,bool,bool,bool,bool,bool,
         bool);
 static void draw_bus                (WINDOW*,int,int,
-        uint64_t);
+        std::uint32_t);
 static void draw_program_counter    (WINDOW*,int,int, bool, bool,
-        uint64_t);
+        std::uint32_t);
 static void draw_instruction_counter(WINDOW*,int,int,
-        uint64_t);
+        std::uint32_t);
 static void draw_instruction_reg    (WINDOW*,int,int, bool, bool,
-        uint64_t);
+        std::uint32_t);
 static void draw_memory_address     (WINDOW*,int,int, bool,
-        uint64_t);
+        std::uint32_t);
 static void draw_ram                (WINDOW*,int,int, bool, bool,
-        uint64_t);
+        std::uint32_t);
 static void draw_a_reg              (WINDOW*,int,int, bool, bool,
-        uint64_t);
+        std::uint32_t);
 static void draw_b_reg              (WINDOW*,int,int, bool,
-        uint64_t);
+        std::uint32_t);
 static void draw_alu                (WINDOW*,int,int, bool,
-        uint64_t, bool, bool, bool);
+        std::uint32_t, bool, bool, bool);
 static void draw_out_reg            (WINDOW*,int,int, bool,
-        uint64_t);
+        std::uint32_t);
+
+static std::string GetEnv(const std::string &var)
+{
+    const char* val = std::getenv(var.c_str());
+    return val==nullptr ? "" : std::string(val);
+}
 
 static inline char bool_to_c (bool in)
 {
-    return (in==true) ? '1' : '0';
+    return in ? '1' : '0';
 }
 
 static void tick ( int tickcount, VTop *tb,
@@ -70,15 +71,15 @@ static void tick ( int tickcount, VTop *tb,
 {
     tb->eval();
     // log right before clock
-    if (tfp != NULL)
+    if (tfp != nullptr)
         tfp->dump(tickcount*10-2);
     tb->mclk = 1;
     tb->eval();
     // log at the posedge
-    if (tfp != NULL)
+    if (tfp != nullptr)
         tfp->dump(tickcount * 10 );
     // log before neg edge
-    if (tfp != NULL)
+    if (tfp != nullptr)
     {
         tfp->dump(tickcount*10 + 5);
         tfp->flush();
@@ -86,7 +87,7 @@ static void tick ( int tickcount, VTop *tb,
     tb->mclk = 0;
     tb->eval();
     // log after negedge
-    if (tfp != NULL)
+    if (tfp != nullptr)
     {
         tfp->dump(tickcount*10 + 6);
         tfp->flush();
@@ -96,74 +97,85 @@ static void tick ( int tickcount, VTop *tb,
 
 int main(int argc, char**argv)
 {
+    const bool dump_traces = (GetEnv("DUMPTRACES") == "1") || (GetEnv("DUMP_TRACES") == "1");
+    const bool use_gui     = (GetEnv("USEGUI")     == "1") || (GetEnv("USE_GUI")     == "1");
     Verilated::commandArgs(argc,argv);
     VTop          *tb  = new VTop;
-    assert(tb!=NULL);
-    VerilatedVcdC *tfp = NULL;
+    if (tb == nullptr)
+    {
+        std::cerr << "Error opening Verilator bench." << std::endl;
+        return 1;
+    }
+    VerilatedVcdC *tfp = nullptr;
 
-    if (GEN_TRACES)
+    if (dump_traces)
     {
         Verilated::traceEverOn(true);
         tfp = new VerilatedVcdC;
         tb->trace(tfp,99);
         tfp->open("top_trace.vcd");
-        assert(tfp!=NULL);
+        if (tfp == nullptr)
+        {
+            std::cerr << "Error opening VCD file." << std::endl;
+            delete tb;
+            return 2;
+        }
     }
 
     // set up windows - everything will be size 0 if not using gui
     int rows = 0;
     int cols = 0;
     // center
-    int control_word_start_x        = 1;
-    int control_word_start_y        = MIN_ROWS-6;
-    int control_word_cols           = MIN_COLS-2;
-    int control_word_rows           = 5;
-    int bus_start_x                 = 1;
-    int bus_start_y                 = 4;
-    int bus_cols                    = MIN_COLS-2;
-    int bus_rows                    = 4;
+    constexpr int control_word_start_x        = 1;
+    constexpr int control_word_start_y        = MIN_ROWS-6;
+    constexpr int control_word_cols           = MIN_COLS-2;
+    constexpr int control_word_rows           = 5;
+    constexpr int bus_start_x                 = 1;
+    constexpr int bus_start_y                 = 4;
+    constexpr int bus_cols                    = MIN_COLS-2;
+    constexpr int bus_rows                    = 4;
     // left stack
-    int clk_start_x                 = 1;
-    int clk_start_y                 = 8;
-    int clk_cols                    = 36;
-    int clk_rows                    = 4;
-    int memory_address_start_x      = clk_start_x;
-    int memory_address_start_y      = clk_start_y+clk_rows;
-    int memory_address_cols         = clk_cols;
-    int memory_address_rows         = 4;
-    int ram_start_x                 = memory_address_start_x;
-    int ram_start_y                 = memory_address_start_y+memory_address_rows;
-    int ram_cols                    = memory_address_cols;
-    int ram_rows                    = 4;
-    int instruction_reg_start_x     = ram_start_x;
-    int instruction_reg_start_y     = ram_start_y + ram_rows;
-    int instruction_reg_cols        = ram_cols;
-    int instruction_reg_rows        = 4;
-    int instruction_counter_start_x = instruction_reg_start_x;
-    int instruction_counter_start_y = instruction_reg_start_y+instruction_reg_rows;
-    int instruction_counter_cols    = instruction_reg_cols;
-    int instruction_counter_rows    = 4;
+    constexpr int clk_start_x                 = 1;
+    constexpr int clk_start_y                 = 8;
+    constexpr int clk_cols                    = 36;
+    constexpr int clk_rows                    = 4;
+    constexpr int memory_address_start_x      = clk_start_x;
+    constexpr int memory_address_start_y      = clk_start_y+clk_rows;
+    constexpr int memory_address_cols         = clk_cols;
+    constexpr int memory_address_rows         = 4;
+    constexpr int ram_start_x                 = memory_address_start_x;
+    constexpr int ram_start_y                 = memory_address_start_y+memory_address_rows;
+    constexpr int ram_cols                    = memory_address_cols;
+    constexpr int ram_rows                    = 4;
+    constexpr int instruction_reg_start_x     = ram_start_x;
+    constexpr int instruction_reg_start_y     = ram_start_y + ram_rows;
+    constexpr int instruction_reg_cols        = ram_cols;
+    constexpr int instruction_reg_rows        = 4;
+    constexpr int instruction_counter_start_x = instruction_reg_start_x;
+    constexpr int instruction_counter_start_y = instruction_reg_start_y+instruction_reg_rows;
+    constexpr int instruction_counter_cols    = instruction_reg_cols;
+    constexpr int instruction_counter_rows    = 4;
     // right stack
-    int program_counter_start_x     = MIN_COLS-37;
-    int program_counter_start_y     = 8;
-    int program_counter_cols        = 36;
-    int program_counter_rows        = 4;
-    int a_reg_start_x               = program_counter_start_x;
-    int a_reg_start_y               = program_counter_start_y+program_counter_rows;
-    int a_reg_cols                  = program_counter_cols;
-    int a_reg_rows                  = 4;
-    int alu_start_x                 = a_reg_start_x;
-    int alu_start_y                 = a_reg_start_y+a_reg_rows;
-    int alu_cols                    = a_reg_cols;
-    int alu_rows                    = 5;
-    int b_reg_start_x               = alu_start_x;
-    int b_reg_start_y               = alu_start_y+alu_rows;
-    int b_reg_cols                  = alu_cols;
-    int b_reg_rows                  = 4;
-    int out_reg_start_x             = b_reg_start_x;
-    int out_reg_start_y             = b_reg_start_y+b_reg_rows;
-    int out_reg_cols                = b_reg_cols;
-    int out_reg_rows                = 4;
+    constexpr int program_counter_start_x     = MIN_COLS-37;
+    constexpr int program_counter_start_y     = 8;
+    constexpr int program_counter_cols        = 36;
+    constexpr int program_counter_rows        = 4;
+    constexpr int a_reg_start_x               = program_counter_start_x;
+    constexpr int a_reg_start_y               = program_counter_start_y+program_counter_rows;
+    constexpr int a_reg_cols                  = program_counter_cols;
+    constexpr int a_reg_rows                  = 4;
+    constexpr int alu_start_x                 = a_reg_start_x;
+    constexpr int alu_start_y                 = a_reg_start_y+a_reg_rows;
+    constexpr int alu_cols                    = a_reg_cols;
+    constexpr int alu_rows                    = 5;
+    constexpr int b_reg_start_x               = alu_start_x;
+    constexpr int b_reg_start_y               = alu_start_y+alu_rows;
+    constexpr int b_reg_cols                  = alu_cols;
+    constexpr int b_reg_rows                  = 4;
+    constexpr int out_reg_start_x             = b_reg_start_x;
+    constexpr int out_reg_start_y             = b_reg_start_y+b_reg_rows;
+    constexpr int out_reg_cols                = b_reg_cols;
+    constexpr int out_reg_rows                = 4;
 
     // control flow for gui mode
     int ch             = 0;
@@ -171,7 +183,7 @@ int main(int argc, char**argv)
     int big_step_mode  = 0;
     int exit           = 0;
 
-    if (USE_GUI)
+    if (use_gui)
     {
         initscr();
         curs_set(0);
@@ -218,7 +230,7 @@ int main(int argc, char**argv)
     WINDOW* out_reg_win             = newwin(out_reg_rows,out_reg_cols,out_reg_start_y,out_reg_start_x);
 
     // do the initial draw
-    if (USE_GUI)
+    if (use_gui)
     {
         draw_main (main_win, rows, cols);
         draw_clk  (clk_win,  clk_rows, clk_cols,
@@ -268,20 +280,20 @@ int main(int argc, char**argv)
     bool programcnten;
     bool programcnto;
     bool jump;
+    bool zero;
+    bool carry;
+    bool odd;
 
-    uint64_t bus_out;
-    uint64_t program_counter;
-    uint64_t instruction_counter;
-    uint64_t instruction_reg;
-    uint64_t memory_address;
-    uint64_t ram_data;
-    uint64_t a_reg;
-    uint64_t b_reg;
-    uint64_t alu_data;
-    bool     zero;
-    bool     carry;
-    bool     odd;
-    uint64_t out_data;
+    std::uint32_t bus_out;
+    std::uint32_t program_counter;
+    std::uint32_t instruction_counter;
+    std::uint32_t instruction_reg;
+    std::uint32_t memory_address;
+    std::uint32_t ram_data;
+    std::uint32_t a_reg;
+    std::uint32_t b_reg;
+    std::uint32_t alu_data;
+    std::uint32_t out_data;
 
 
     // capture variables in a loop - also do gui if needed
@@ -305,6 +317,9 @@ int main(int argc, char**argv)
         programcnten = tb->Top->get_programcnten();
         programcnto  = tb->Top->get_programcnto();
         jump         = tb->Top->get_jump();
+        zero         = tb->Top->get_zero();
+        carry        = tb->Top->get_carry();
+        odd          = tb->Top->get_odd();
 
         bus_out             = tb->Top->get_bus_out();
         program_counter     = tb->Top->get_program_counter();
@@ -315,11 +330,8 @@ int main(int argc, char**argv)
         a_reg               = tb->Top->get_a_reg();
         b_reg               = tb->Top->get_b_reg();
         alu_data            = tb->Top->get_alu_data();
-        zero                = tb->Top->get_zero();
-        carry               = tb->Top->get_carry();
-        odd                 = tb->Top->get_odd();
         out_data            = tb->Top->get_out_data();
-        if (USE_GUI)
+        if (use_gui)
         {
             auto start = std::chrono::steady_clock::now();
             bool stay_in_loop = 1;
@@ -330,13 +342,13 @@ int main(int argc, char**argv)
                 if (big_step_mode)
                 {
                     stay_in_loop  = 0;
-                    if ( instruction_counter == 0)
+                    if (instruction_counter == 0)
                     {
                         big_step_mode = 0;
                         nodelay(main_win,FALSE);
                     }
                 }
-                if (run_mode ==1 && millis > step_time_ms)
+                if (run_mode == 1 && millis > step_time_ms)
                 {
                     stay_in_loop = 0;
                 }
@@ -407,7 +419,7 @@ int main(int argc, char**argv)
     } while (k < 100000 && (halt!=1) && !exit);
 
     // if we exited by halting wait, if not quit immediately
-    if (USE_GUI)
+    if (use_gui)
     {
         if (halt == 1)
         {
@@ -460,7 +472,7 @@ static void draw_main               (WINDOW* win,int rows,int cols)
 }
 
 static void draw_clk  (WINDOW* win,  int rows, int cols,
-        uint64_t ticks)
+        std::uint32_t ticks)
 {
     wattron(win,COLOR_PAIR(COLOR_DEFAULT));
     box    (win,rows,cols);
@@ -500,7 +512,7 @@ static void draw_control_word       (WINDOW* win,int rows,int cols,
     wrefresh(win);
 }
 static void draw_bus                (WINDOW* win,int rows,int cols,
-        uint64_t bus_out)
+        std::uint32_t bus_out)
 {
     wattron(win,COLOR_PAIR(COLOR_DEFAULT));
     box(win,rows,cols);
@@ -509,7 +521,7 @@ static void draw_bus                (WINDOW* win,int rows,int cols,
     wrefresh(win);
 }
 static void draw_program_counter    (WINDOW* win, int rows,int cols, bool jump, bool programcnto,
-        uint64_t program_counter)
+        std::uint32_t program_counter)
 {
     if (jump)
     {
@@ -536,7 +548,7 @@ static void draw_program_counter    (WINDOW* win, int rows,int cols, bool jump, 
     wrefresh(win);
 }
 static void draw_instruction_counter(WINDOW* win,int rows,int cols,
-        uint64_t instruction_counter)
+        std::uint32_t instruction_counter)
 {
     wattron(win,COLOR_PAIR(COLOR_DEFAULT));
     box(win,rows,cols);
@@ -545,7 +557,7 @@ static void draw_instruction_counter(WINDOW* win,int rows,int cols,
     wrefresh(win);
 }
 static void draw_instruction_reg    (WINDOW* win,int rows,int cols, bool instrregi, bool instrrego,
-        uint64_t instruction_reg)
+        std::uint32_t instruction_reg)
 {
     if (instrregi)
     {
@@ -572,7 +584,7 @@ static void draw_instruction_reg    (WINDOW* win,int rows,int cols, bool instrre
     wrefresh(win);
 }
 static void draw_memory_address     (WINDOW* win,int rows,int cols, bool memaddri,
-        uint64_t memory_address)
+        std::uint32_t memory_address)
 {
     if (memaddri)
     {
@@ -591,7 +603,7 @@ static void draw_memory_address     (WINDOW* win,int rows,int cols, bool memaddr
     wrefresh(win);
 }
 static void draw_ram                (WINDOW* win,int rows,int cols, bool rami, bool ramo,
-        uint64_t ram)
+        std::uint32_t ram)
 {
     if (rami)
     {
@@ -618,7 +630,7 @@ static void draw_ram                (WINDOW* win,int rows,int cols, bool rami, b
     wrefresh(win);
 }
 static void draw_a_reg              (WINDOW* win,int rows,int cols, bool aregi, bool arego,
-        uint64_t a_reg)
+        std::uint32_t a_reg)
 {
     if (aregi)
     {
@@ -645,7 +657,7 @@ static void draw_a_reg              (WINDOW* win,int rows,int cols, bool aregi, 
     wrefresh(win);
 }
 static void draw_b_reg              (WINDOW* win,int rows,int cols, bool bregi,
-        uint64_t b_reg)
+        std::uint32_t b_reg)
 {
     if (bregi)
     {
@@ -664,7 +676,7 @@ static void draw_b_reg              (WINDOW* win,int rows,int cols, bool bregi,
     wrefresh(win);
 }
 static void draw_alu                (WINDOW* win,int rows,int cols, bool aluo,
-        uint64_t alu_data, bool zero, bool carry, bool odd)
+        std::uint32_t alu_data, bool zero, bool carry, bool odd)
 {
     if (aluo)
     {
@@ -685,7 +697,7 @@ static void draw_alu                (WINDOW* win,int rows,int cols, bool aluo,
     wrefresh(win);
 }
 static void draw_out_reg            (WINDOW* win,int rows,int cols, bool oregi,
-        uint64_t out_data)
+        std::uint32_t out_data)
 {
     if (oregi)
     {

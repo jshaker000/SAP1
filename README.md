@@ -9,6 +9,7 @@ This project was part of my own learning experience of Computer Architecture and
 and I hope that this finds someone else whose intrigued and finds it helpful.
 
 The bench is written in C++ and is compiled using [Verilator](https://www.veripool.org/wiki/verilator).
+I used the bench to generate a front ponel with ncurses.
 
 ## Tweaks from Ben's Machine
 There are some modifications I made to make it more simulatable and easier for me to work with.
@@ -44,18 +45,21 @@ You should place your RAM file in "ram.hex". I've left an example in the repo.
 The main bench is in *Top.cpp*. In the file you have the option to run in GUI mode, which lets you
 step the clock and view registers changing (its simplistic, but functional), and you have the option
 to dump the outputs to a trace file. This will create a \*.vcd which you can open with GTKWAVE.
-This will show you all waveforms. You can combine these options, or run without the GUI and just dump
-for faster, more scripted testing.
+This will show you all waveforms. You can combine these options using enviornment variables.
+Setting a variable to "1" will set it. Setting it to anything else, or leaving unset will keep it disabled.
+
+IE
+
+    USE_GUI=0 DUMP_TRACES=1 make
 
 You also could make some C model of what you expect the Computer to do and then just use if statements to compare.
 Then, if your program doesn't exit out, you will know that it succeeded - and viewing the waveform would be unnecessary.
-
 You can make more benches and update the makefile appropriately if you like.
 
 ## Further Work
 ### Extending to 16 bits and beyond
 Most of the design is parameterized so it should be pretty easy to exend bitwidths, etc. I'd love to
-see what you make but likely will leave this as the "base" computer.
+see what you make but likely will leave this repo as the "base" computer.
 ### Compiler
 I'd love to make some scripts that take plain text and can compile to both Instruction\_Decoder.v and also use that file
 to convert instructions into the ram file.
@@ -63,12 +67,6 @@ to convert instructions into the ram file.
 Right now the Ncurses interface is a bit of a hack, I'd love to clean it up or possibly do a full GUI with QT or SDL or something.
 Ideas I also has would be to have a key to pull up the entire contents of ram, to inject contents into RAM,
 and also to maybe have a key file to convert what's in the instruction register to text "LDA/STA/etc"
-### Use Enviorment Variables in Make
-I'd like to modify the C++ program so I can run
-
-    USE_GUI=0 GEN_TRACES=1 make
-
-Or something like that, rather than recompiling. I can't imagine that being too hard.
 
 ### FPGA Implementation
 #### Output Module
