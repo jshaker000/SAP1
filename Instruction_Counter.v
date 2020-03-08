@@ -22,7 +22,7 @@ module Instruction_Counter(
   wire advance_counter  = mclk_en & ~i_halt & ~reset_counter;
   wire reset_counter    = mclk_en & ~i_halt & (counter_max | i_adv);
 
-  always @(negedge mclk) counter <= advance_counter  ? counter + {{STEP_WIDTH-1{1'b0}},1'b1} :
+  always @(posedge mclk) counter <= advance_counter  ? counter + {{STEP_WIDTH-1{1'b0}},1'b1} :
                                     reset_counter    ? {STEP_WIDTH{1'b0}}                    :
                                     counter;
   assign o_data = counter;

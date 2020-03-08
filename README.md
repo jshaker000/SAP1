@@ -26,6 +26,10 @@ real FPGA the clock would be far too fast. So you can use the Clock Enable Modul
 clock, or if you are comfortable with synchronizers and debouncing to manually toggle the clock.
 It is safer to send the clock everywhere with an enable then to gate the clock directly using gates.
 
+### Instruction Counter
+Changed from negedge to posedge so logic can run faster. Works just aswell, and no other design changes were needed.
+This should allow the design to run faster.
+
 ### ADV Microinstruction
 I added the "Advance" microinstruction which immediately resets the instruction counter to 0.
 This means we dont have to fill each instruction with NOPs and waste cycles there.
@@ -65,9 +69,6 @@ I'd like to modify the C++ program so I can run
     USE_GUI=0 GEN_TRACES=1 make
 
 Or something like that, rather than recompiling. I can't imagine that being too hard.
-### Clock Strategies
-There is the weird counter that works on negative edges. It might be better to count even/odd clocks or come up with some
-different strategy for that counter in particular. It probably would be pretty easy - it just needs a bit of thinking.
 
 ### FPGA Implementation
 #### Output Module
@@ -81,10 +82,6 @@ back into the main ram to easily restart
 #### UART RAM Programming
 Some way to reprogram the RAM from a computer so that we dont have to reelaborate and synthesisize and all each time.
 Obviously that wont cover RTL changes though.
-#### Clocking
-Eventually everything will need to be registered (most likely). This will change timing but it should be simple enough.
-I also want to remove the negedge triggered counter for instruction counter. That might require counting 
-wheter we are on an even or odd clock and alternating appropriately between "real clock" and "negedge clock".
 
 ## Screenshots
 
