@@ -29,31 +29,31 @@ static double step_time_ms                  = 1000.0/20.0;
 // each draw function needs the window, the dimensions of the widnow, and the data
 static void draw_main               (WINDOW*,int,int);
 static void draw_clk                (WINDOW*,int,int,
-        std::uint32_t);
+        std::uint64_t);
 static void draw_control_word       (WINDOW*,int,int,
         bool,bool,bool,bool,bool,bool,bool,bool,
         bool,bool,bool,bool,bool,bool,bool,bool,
         bool);
 static void draw_bus                (WINDOW*,int,int,
-        std::uint32_t);
+        std::uint64_t);
 static void draw_program_counter    (WINDOW*,int,int, bool, bool,
-        std::uint32_t);
+        std::uint64_t);
 static void draw_instruction_counter(WINDOW*,int,int,
-        std::uint32_t);
+        std::uint64_t);
 static void draw_instruction_reg    (WINDOW*,int,int, bool, bool,
-        std::uint32_t);
+        std::uint64_t);
 static void draw_memory_address     (WINDOW*,int,int, bool,
-        std::uint32_t);
+        std::uint64_t);
 static void draw_ram                (WINDOW*,int,int, bool, bool,
-        std::uint32_t);
+        std::uint64_t);
 static void draw_a_reg              (WINDOW*,int,int, bool, bool,
-        std::uint32_t);
+        std::uint64_t);
 static void draw_b_reg              (WINDOW*,int,int, bool,
-        std::uint32_t);
+        std::uint64_t);
 static void draw_alu                (WINDOW*,int,int, bool,
-        std::uint32_t, bool, bool, bool);
+        std::uint64_t, bool, bool, bool);
 static void draw_out_reg            (WINDOW*,int,int, bool,
-        std::uint32_t);
+        std::uint64_t);
 
 static std::string GetEnv(const std::string &var)
 {
@@ -234,7 +234,7 @@ int main(int argc, char**argv)
     {
         draw_main (main_win, rows, cols);
         draw_clk  (clk_win,  clk_rows, clk_cols,
-                -1);
+                static_cast<std::uint64_t>(-1));
         draw_control_word       (control_word_win, rows, cols,
                 0,0,0,0,0,0,0,0,
                 0,0,0,0,0,0,0,0,
@@ -284,16 +284,16 @@ int main(int argc, char**argv)
     bool carry;
     bool odd;
 
-    std::uint32_t bus_out;
-    std::uint32_t program_counter;
-    std::uint32_t instruction_counter;
-    std::uint32_t instruction_reg;
-    std::uint32_t memory_address;
-    std::uint32_t ram_data;
-    std::uint32_t a_reg;
-    std::uint32_t b_reg;
-    std::uint32_t alu_data;
-    std::uint32_t out_data;
+    std::uint64_t bus_out;
+    std::uint64_t program_counter;
+    std::uint64_t instruction_counter;
+    std::uint64_t instruction_reg;
+    std::uint64_t memory_address;
+    std::uint64_t ram_data;
+    std::uint64_t a_reg;
+    std::uint64_t b_reg;
+    std::uint64_t alu_data;
+    std::uint64_t out_data;
 
 
     // capture variables in a loop - also do gui if needed
@@ -442,6 +442,7 @@ int main(int argc, char**argv)
     {
         exit_code = 0;
         std::cerr << "Success: Simulation Terminated successfully at a HLT!" << std::endl;
+        std::cerr << "Out Register (dec): " << out_data << std::endl;
     }
     else
     {
@@ -472,7 +473,7 @@ static void draw_main               (WINDOW* win,int rows,int cols)
 }
 
 static void draw_clk  (WINDOW* win,  int rows, int cols,
-        std::uint32_t ticks)
+        std::uint64_t ticks)
 {
     wattron(win,COLOR_PAIR(COLOR_DEFAULT));
     box    (win,rows,cols);
@@ -512,7 +513,7 @@ static void draw_control_word       (WINDOW* win,int rows,int cols,
     wrefresh(win);
 }
 static void draw_bus                (WINDOW* win,int rows,int cols,
-        std::uint32_t bus_out)
+        std::uint64_t bus_out)
 {
     wattron(win,COLOR_PAIR(COLOR_DEFAULT));
     box(win,rows,cols);
@@ -521,7 +522,7 @@ static void draw_bus                (WINDOW* win,int rows,int cols,
     wrefresh(win);
 }
 static void draw_program_counter    (WINDOW* win, int rows,int cols, bool jump, bool programcnto,
-        std::uint32_t program_counter)
+        std::uint64_t program_counter)
 {
     if (jump)
     {
@@ -548,7 +549,7 @@ static void draw_program_counter    (WINDOW* win, int rows,int cols, bool jump, 
     wrefresh(win);
 }
 static void draw_instruction_counter(WINDOW* win,int rows,int cols,
-        std::uint32_t instruction_counter)
+        std::uint64_t instruction_counter)
 {
     wattron(win,COLOR_PAIR(COLOR_DEFAULT));
     box(win,rows,cols);
@@ -557,7 +558,7 @@ static void draw_instruction_counter(WINDOW* win,int rows,int cols,
     wrefresh(win);
 }
 static void draw_instruction_reg    (WINDOW* win,int rows,int cols, bool instrregi, bool instrrego,
-        std::uint32_t instruction_reg)
+        std::uint64_t instruction_reg)
 {
     if (instrregi)
     {
@@ -584,7 +585,7 @@ static void draw_instruction_reg    (WINDOW* win,int rows,int cols, bool instrre
     wrefresh(win);
 }
 static void draw_memory_address     (WINDOW* win,int rows,int cols, bool memaddri,
-        std::uint32_t memory_address)
+        std::uint64_t memory_address)
 {
     if (memaddri)
     {
@@ -603,7 +604,7 @@ static void draw_memory_address     (WINDOW* win,int rows,int cols, bool memaddr
     wrefresh(win);
 }
 static void draw_ram                (WINDOW* win,int rows,int cols, bool rami, bool ramo,
-        std::uint32_t ram)
+        std::uint64_t ram)
 {
     if (rami)
     {
@@ -630,7 +631,7 @@ static void draw_ram                (WINDOW* win,int rows,int cols, bool rami, b
     wrefresh(win);
 }
 static void draw_a_reg              (WINDOW* win,int rows,int cols, bool aregi, bool arego,
-        std::uint32_t a_reg)
+        std::uint64_t a_reg)
 {
     if (aregi)
     {
@@ -657,7 +658,7 @@ static void draw_a_reg              (WINDOW* win,int rows,int cols, bool aregi, 
     wrefresh(win);
 }
 static void draw_b_reg              (WINDOW* win,int rows,int cols, bool bregi,
-        std::uint32_t b_reg)
+        std::uint64_t b_reg)
 {
     if (bregi)
     {
@@ -676,7 +677,7 @@ static void draw_b_reg              (WINDOW* win,int rows,int cols, bool bregi,
     wrefresh(win);
 }
 static void draw_alu                (WINDOW* win,int rows,int cols, bool aluo,
-        std::uint32_t alu_data, bool zero, bool carry, bool odd)
+        std::uint64_t alu_data, bool zero, bool carry, bool odd)
 {
     if (aluo)
     {
@@ -697,7 +698,7 @@ static void draw_alu                (WINDOW* win,int rows,int cols, bool aluo,
     wrefresh(win);
 }
 static void draw_out_reg            (WINDOW* win,int rows,int cols, bool oregi,
-        std::uint32_t out_data)
+        std::uint64_t out_data)
 {
     if (oregi)
     {
