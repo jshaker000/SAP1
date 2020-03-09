@@ -2,14 +2,54 @@
 
 ## Purpose:
 
-This collection of RTL is meant to model an 8-bit SAP1 computer, specifically based on
-Ben Eater's whcih he describes in great detail [here](https://eater.net/8bit).
+This collection of RTL is meant to model an 8-bit SAP1 computer as explained by Albert Paul Malvino,
+but specifically based on Ben Eater's design he describes in great detail [here](https://eater.net/8bit).
 
 This project was part of my own learning experience of Computer Architecture and Verilog,
-and I hope that this finds someone else whose intrigued and finds it helpful.
+and I hope that this finds someone else who finds it useful as an introduction to either topic.
 
 The bench is written in C++ and is compiled using [Verilator](https://www.veripool.org/wiki/verilator).
-I used the bench to generate a front ponel with ncurses.
+I used the bench to generate dumps and a front ponel with ncurses.
+
+## Theory of Operation
+
+Malvino's SAP 1 has several components
+
+    1. Two 8-bit general purpose registers (A and B)
+    2. 16x1 byte RAM, which is addressed by:
+    3. 4-bit Memory Address Register
+    3. An 8-bit ALU which supports addition and subtraction between the A & B Registers.
+    4. A Program counter and an Instruction Counter for microinstructions
+    5. An 8-bit Instruction Register, which stores the current instruction.
+    6. An 8-bit Bus which connects the above elements together
+    7. Control Logic, which combines the Instruction Counter and the Instruction OpCode to
+       decide what gets put on and what gets read from the bus, among other things.
+    8. An Output Register
+
+At the beginning, the program counter and Instruction Counter are both initialized to 0.
+The Instruction Counter will increment on every Clock.
+
+At the 1st and 2nd step (the value 0 and value 1 of the Instruction Counter) for every instruction
+    0. The Program Counter gets put onto the Bus, and Read in by the Memory Address Register
+    1. The Value from RAM is output to the Bus, and Read in by the Instruction Register. The Program Counter is incremented by 1 to prepare for the next instruction.
+
+Each Instruction is made of 2 4-bit bit fields: the 4-bit OP Code and the 4-bit Argument.
+
+The OpCode is combined with the Instruction Counter in the InstructionDecode module to produce appropriate control words for the remaining steps.
+
+IE: LDA 15 (0x1F)
+   2. Put 15 (F) [the argument] onto the bus, and load it into the Memory Address Register
+   3. Put the output of RAM onto the bus, and load it into the A Register
+   4. Set the Instruction Counter to 0. (The Program counter was already incremented, so this will start execution of the next instruction).
+
+This effectively copies the value RAM[Argument] into the A Register. Other instructions work similarly.
+Its always an interesting decision to figure out how much you want to implement in hardware vs software, to try to help keep the other simple.
+
+The ALU will latch flags such as carry, zero, or overflow at the end of each of its operations. These are used for conditional instructions,
+such as JIZ (jump if zero). At least one conditional instruction is requried to make the machine turing complete.
+
+An example program is attached in "ram.hex.ex". Hopefully, by reading that an the InstructionDecode logic, and perhaps running some sims, this will help you
+understand how the machine understands and steps through instructions.
 
 ## Tweaks from Ben's Machine
 There are some modifications I made to make it more simulatable and easier for me to work with.
@@ -32,7 +72,7 @@ Changed from negedge to posedge so logic can run faster. Works just aswell, and 
 This should allow the design to run faster.
 
 ### ADV Microinstruction
-I added the "Advance" microinstruction which immediately resets the instruction counter to 0.
+I added the "Advance" microinstruction which immediately resets the Instruction Counter to 0.
 This means we dont have to fill each instruction with NOPs and waste cycles there.
 
 ## Installation and Usage
