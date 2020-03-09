@@ -114,7 +114,7 @@ module Instruction_Decoder (
   assign control_word = // fetch, put prgm cntr in mem addr, fetch instruction, advance PC. All instructions start like this
                  i_step == 'h0 ? c_MI | c_CO        :
                  i_step == 'h1 ? c_RO | c_II | c_CE :
-                // i_instruction == 'h0 ? // unimplement - defaults at bottom to NOP
+                // i_instruction == 'h0 ? // unimplemented - defaults at bottom to NOP
                    i_instruction == 'h1 ? // LDA - put data in RAM addr in A
                      i_step == 'h2      ? c_IO | c_MI        :
                      i_step == 'h3      ? c_RO | c_AI        :
