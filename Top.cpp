@@ -215,19 +215,19 @@ int main(int argc, char**argv)
         cols = MIN_COLS;
     }
 
-    WINDOW* main_win                = newwin(rows,cols,0,0);
-    WINDOW* clk_win                 = newwin(clk_rows,clk_cols,clk_start_y,clk_start_x);
-    WINDOW* control_word_win        = newwin(control_word_rows,control_word_cols,control_word_start_y,control_word_start_x);
-    WINDOW* bus_win                 = newwin(bus_rows,bus_cols,bus_start_y,bus_start_x);
-    WINDOW* program_counter_win     = newwin(program_counter_rows,program_counter_cols,program_counter_start_y,program_counter_start_x);
-    WINDOW* instruction_counter_win = newwin(instruction_counter_rows,instruction_counter_cols,instruction_counter_start_y,instruction_counter_start_x);
-    WINDOW* instruction_reg_win     = newwin(instruction_reg_rows,instruction_reg_cols,instruction_reg_start_y,instruction_reg_start_x);
-    WINDOW* memory_address_win      = newwin(memory_address_rows,memory_address_cols,memory_address_start_y,memory_address_start_x);
-    WINDOW* ram_win                 = newwin(ram_rows,ram_cols,ram_start_y,ram_start_x);
-    WINDOW* a_reg_win               = newwin(a_reg_rows,a_reg_cols,a_reg_start_y,a_reg_start_x);
-    WINDOW* b_reg_win               = newwin(b_reg_rows,b_reg_cols,b_reg_start_y,b_reg_start_x);
-    WINDOW* alu_win                 = newwin(alu_rows,alu_cols,alu_start_y,alu_start_x);
-    WINDOW* out_reg_win             = newwin(out_reg_rows,out_reg_cols,out_reg_start_y,out_reg_start_x);
+    WINDOW* main_win                = use_gui ? newwin(rows,cols,0,0) : nullptr;
+    WINDOW* clk_win                 = use_gui ? newwin(clk_rows,clk_cols,clk_start_y,clk_start_x) : nullptr;
+    WINDOW* control_word_win        = use_gui ? newwin(control_word_rows,control_word_cols,control_word_start_y,control_word_start_x) : nullptr;
+    WINDOW* bus_win                 = use_gui ? newwin(bus_rows,bus_cols,bus_start_y,bus_start_x) : nullptr;
+    WINDOW* program_counter_win     = use_gui ? newwin(program_counter_rows,program_counter_cols,program_counter_start_y,program_counter_start_x) : nullptr;
+    WINDOW* instruction_counter_win = use_gui ? newwin(instruction_counter_rows,instruction_counter_cols,instruction_counter_start_y,instruction_counter_start_x) : nullptr;
+    WINDOW* instruction_reg_win     = use_gui ? newwin(instruction_reg_rows,instruction_reg_cols,instruction_reg_start_y,instruction_reg_start_x) : nullptr;
+    WINDOW* memory_address_win      = use_gui ? newwin(memory_address_rows,memory_address_cols,memory_address_start_y,memory_address_start_x) : nullptr;
+    WINDOW* ram_win                 = use_gui ? newwin(ram_rows,ram_cols,ram_start_y,ram_start_x) : nullptr;
+    WINDOW* a_reg_win               = use_gui ? newwin(a_reg_rows,a_reg_cols,a_reg_start_y,a_reg_start_x) : nullptr;
+    WINDOW* b_reg_win               = use_gui ? newwin(b_reg_rows,b_reg_cols,b_reg_start_y,b_reg_start_x) : nullptr;
+    WINDOW* alu_win                 = use_gui ? newwin(alu_rows,alu_cols,alu_start_y,alu_start_x) : nullptr;
+    WINDOW* out_reg_win             = use_gui ? newwin(out_reg_rows,out_reg_cols,out_reg_start_y,out_reg_start_x) : nullptr;
 
     // do the initial draw
     if (use_gui)
