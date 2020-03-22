@@ -6,10 +6,12 @@ LD_FLAGS       := -lncurses
 CFLAGS         := --std=c++11 -O3 -Wall
 V_FLAGS        := --Wall --clk mclk --trace --Mdir ${OBJ_DIR} --prefix ${VERILATED_NAME}
 
-.PHONY: default clean
+.PHONY: run all clean
 
-default : ${OBJ_DIR}/${VERILATED_NAME} ${RAMFILE}
-	./$<
+run: all
+	${OBJ_DIR}/./${VERILATED_NAME}
+
+all: ${OBJ_DIR}/${VERILATED_NAME} ${RAMFILE}
 
 ${RAMFILE} : % : %.ex
 	if [ ! -f $@ ]; then cp $< $@; else touch $@; fi
