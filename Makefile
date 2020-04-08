@@ -3,7 +3,7 @@ VERILATED_NAME := V${MODULE_NAME}
 RAMFILE        := ram.hex
 OBJ_DIR        := obj_dir
 LD_FLAGS       := -lncurses
-CFLAGS         := --std=c++11 -O3 -Wall
+CFLAGS         := --std=c++11 -O3 -flto -Wall
 V_FLAGS        := --Wall --clk mclk --trace --Mdir ${OBJ_DIR} --prefix ${VERILATED_NAME}
 
 .PHONY: run all clean
