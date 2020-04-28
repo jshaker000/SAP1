@@ -72,24 +72,25 @@ static void tick ( int tickcount, VTop *tb,
     tb->eval();
     // log right before clock
     if (tfp != nullptr)
-        tfp->dump(tickcount*10-2);
+        tfp->dump(tickcount*10-0.0001);
+    tb->eval();
     tb->mclk = 1;
     tb->eval();
     // log at the posedge
     if (tfp != nullptr)
-        tfp->dump(tickcount * 10 );
+        tfp->dump(tickcount * 10);
     // log before neg edge
     if (tfp != nullptr)
     {
-        tfp->dump(tickcount*10 + 5);
+        tfp->dump(tickcount*10 + 4.999);
         tfp->flush();
     }
-    tb->mclk = 0;
+    tb->mclk  = 0;
     tb->eval();
     // log after negedge
     if (tfp != nullptr)
     {
-        tfp->dump(tickcount*10 + 6);
+        tfp->dump(tickcount*10 + 5.0001);
         tfp->flush();
     }
     return;
