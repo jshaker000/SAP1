@@ -100,6 +100,7 @@ int main(int argc, char**argv)
 {
     const bool dump_traces = (GetEnv("DUMPTRACES") == "1") || (GetEnv("DUMP_TRACES") == "1");
     const bool use_gui     = (GetEnv("USEGUI")     == "1") || (GetEnv("USE_GUI")     == "1");
+    const std::string dp_f = (GetEnv("DUMP_F") != "") ? GetEnv("DUMP_F") : "top_trace.vcd";
     Verilated::commandArgs(argc,argv);
     VTop          *tb  = new VTop;
     if (tb == nullptr)
@@ -114,7 +115,8 @@ int main(int argc, char**argv)
         Verilated::traceEverOn(true);
         tfp = new VerilatedVcdC;
         tb->trace(tfp,99);
-        tfp->open("top_trace.vcd");
+        tfp->open(dp_f.c_str());
+        std::cerr << "Opening Dump File: " << dp_f << std::endl;
         if (tfp == nullptr)
         {
             std::cerr << "Error opening VCD file." << std::endl;

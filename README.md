@@ -92,6 +92,8 @@ IE
 
     USE_GUI=0 DUMP_TRACES=1 make
 
+You can set the DUMP_F variable to name the vcd file (otherwise there is a default name).
+
 You also could make some C model of what you expect the Computer to do and then just use if statements to compare.
 Then, if your program doesn't exit out, you will know that it succeeded - and viewing the waveform would be unnecessary.
 You can make more benches and update the makefile appropriately if you like.
