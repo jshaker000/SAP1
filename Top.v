@@ -1,31 +1,30 @@
-module Top(
-  mclk
+`default_nettype none
+
+module Top #(
+  parameter BUS_WIDTH   = 8,
+  parameter A_REG_WIDTH = 8,
+  parameter B_REG_WIDTH = 8,
+  parameter ALU_WIDTH   = 8,
+  parameter OUT_WIDTH   = 8,
+
+  parameter INSTRUCTION_REGISTER_WIDTH     = 8,
+  parameter INSTRUCTION_REGISTER_OUT_WIDTH = 4,
+
+  parameter PROGRAM_COUNTER_WIDTH          = 4,
+
+  parameter RAM_DEPTH         = 16,
+  parameter RAM_WIDTH         = 8,
+
+  parameter INSTRUCTION_WIDTH  = 4,
+  parameter INSTRUCTION_STEPS  = 8,
+  parameter CONTROL_WORD_WIDTH = 17,
+
+  localparam ADDRESS_WIDTH             = $clog2(RAM_DEPTH),
+  localparam INSTRUCTION_COUNTER_WIDTH = $clog2(INSTRUCTION_STEPS)
+)(
+  input wire mclk,
+  output wire [OUT_WIDTH-1:0] out_data
 );
-
-  parameter BUS_WIDTH   = 8;
-  parameter A_REG_WIDTH = 8;
-  parameter B_REG_WIDTH = 8;
-  parameter ALU_WIDTH   = 8;
-  parameter OUT_WIDTH   = 8;
-
-  parameter INSTRUCTION_REGISTER_WIDTH     = 8;
-  parameter INSTRUCTION_REGISTER_OUT_WIDTH = 4;
-
-  parameter PROGRAM_COUNTER_WIDTH          = 4;
-
-  parameter RAM_DEPTH         = 16;
-  parameter RAM_WIDTH         = 8;
-
-  parameter INSTRUCTION_WIDTH  = 4;
-  parameter INSTRUCTION_STEPS  = 8;
-  parameter CONTROL_WORD_WIDTH = 17;
-
-  localparam ADDRESS_WIDTH             = $clog2(RAM_DEPTH);
-  localparam INSTRUCTION_COUNTER_WIDTH = $clog2(INSTRUCTION_STEPS);
-
-/*--------------BEGIN IO-------------------------------------------------*/
-  input mclk;
-/*---------------END IO--------------------------------------------------*/
 
 /*------------------BEGIN INTERCONNECTS----------------------------------*/
   // clock enable
@@ -62,7 +61,7 @@ module Top(
   // instruction register
   wire        [INSTRUCTION_REGISTER_WIDTH-1:0] instruction_reg;
   wire    [INSTRUCTION_REGISTER_OUT_WIDTH-1:0] instruction_reg_to_bus = instruction_reg[INSTRUCTION_REGISTER_OUT_WIDTH-1:0];
-  wire                 [INSTRUCTION_WIDTH-1:0] instruction            = instruction_reg[INSTRUCTION_REGISTER_WIDTH-1:INSTRUCTION_WIDTH];
+  wire                 [INSTRUCTION_WIDTH-1:0] instruction            = instruction_reg[INSTRUCTION_REGISTER_WIDTH-1 -: INSTRUCTION_WIDTH];
 
   // memory address
   wire                     [ADDRESS_WIDTH-1:0] memory_address;
@@ -82,8 +81,6 @@ module Top(
   wire                                         carry;
   wire                                         odd;
 
-  // out data
-  wire                         [OUT_WIDTH-1:0] out_data;
 /*-------------------END INTERCONNECTS-----------------------------------*/
 
   Clock_Enable inst_Clock_Enable(
@@ -344,7 +341,7 @@ module Top(
     // verilator public
       get_ram_data = ram_data;
     endfunction
-    
+
     function [A_REG_WIDTH-1:0] get_a_reg;
     // verilator public
       get_a_reg = a_reg;

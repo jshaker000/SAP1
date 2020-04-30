@@ -1,26 +1,22 @@
 // maintain which step of the instruction we are on
 
-module Instruction_Counter(
-  mclk,
-  mclk_en,
-  i_halt,
-  i_adv,
-  o_data
+`default_nettype none
+
+module Instruction_Counter #(
+  parameter  INSTRUCTION_STEPS = 8,
+  localparam STEP_WIDTH        = $clog2(INSTRUCTION_STEPS)
+)(
+  input wire mclk,
+  input wire mclk_en,
+  input wire i_adv,
+  input wire i_halt,
+
+  output wire [STEP_WIDTH-1:0] o_data
 );
-
-  parameter  INSTRUCTION_STEPS = 8;
-  localparam STEP_WIDTH        = $clog2(INSTRUCTION_STEPS);
-
-  input mclk;
-  input mclk_en;
-  input i_adv;
-  input i_halt;
-
-  output [STEP_WIDTH-1:0] o_data;
 
   reg    [STEP_WIDTH-1:0] counter = {STEP_WIDTH{1'b0}};
 
-  wire counter_max    = (counter) == (INSTRUCTION_STEPS[STEP_WIDTH-1:0] - 'd1);
+  wire counter_max    = counter == (INSTRUCTION_STEPS[STEP_WIDTH-1:0] - 'd1);
   wire update_counter = mclk_en & ~i_halt;
   wire reset_counter  = i_adv | counter_max;
 

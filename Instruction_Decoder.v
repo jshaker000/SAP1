@@ -1,34 +1,38 @@
 // Combinational module that takes program counter and instruction and ALU
 // flags and produces control logic
 
-module Instruction_Decoder (
-  i_instruction,
-  i_step,
-  i_zero,
-  i_carry,
-  i_odd,
-  o_halt,
-  o_adv,
-  o_memaddri,
-  o_rami,
-  o_ramo,
-  o_instrregi,
-  o_instrrego,
-  o_aregi,
-  o_arego,
-  o_aluo,
-  o_alusub,
-  o_alulatchf,
-  o_bregi,
-  o_oregi,
-  o_programcnten,
-  o_programcnto,
-  o_jump
+`default_nettype none
+
+module Instruction_Decoder #(
+  parameter  INSTRUCTION_WIDTH  = 4,
+  parameter  INSTRUCTION_STEPS  = 8,
+  parameter  CONTROL_WORD_WIDTH = 17,
+  localparam STEP_WIDTH         = $clog2(INSTRUCTION_STEPS)
+)(
+  input wire  [INSTRUCTION_WIDTH-1:0] i_instruction,
+  input wire         [STEP_WIDTH-1:0] i_step,
+  input wire                          i_zero,
+  input wire                          i_carry,
+  input wire                          i_odd,
+
+  output wire                     o_halt,         // halt
+  output wire                     o_adv,          // advance instruction counter to next instruction
+  output wire                     o_memaddri,     // mem address reg in
+  output wire                     o_rami,         // ram data in
+  output wire                     o_ramo,         // ram data out
+  output wire                     o_instrregi,    // instruction reg in
+  output wire                     o_instrrego,    // instruction reg out
+  output wire                     o_aregi,        // A reg in
+  output wire                     o_arego,        // A reg out
+  output wire                     o_aluo,         // ALU out
+  output wire                     o_alusub,       // ALU Subtract
+  output wire                     o_alulatchf,    // ALU Latch Flags
+  output wire                     o_bregi,        // B Reg in
+  output wire                     o_oregi,        // Output Reg in
+  output wire                     o_programcnten, // Program Counter Enable (increment)
+  output wire                     o_programcnto,  // Program Counter Out
+  output wire                     o_jump          // Jump
 );
-  parameter  INSTRUCTION_WIDTH  = 4;
-  parameter  INSTRUCTION_STEPS  = 8;
-  parameter  CONTROL_WORD_WIDTH = 17;
-  localparam STEP_WIDTH         = $clog2(INSTRUCTION_STEPS);
 
   // pnemonics for control words
   localparam HLT_ADDR = 16;
@@ -49,47 +53,23 @@ module Instruction_Decoder (
   localparam CO_ADDR  = 1;
   localparam J_ADDR   = 0;
 
-  wire [CONTROL_WORD_WIDTH-1:0] c_HLT = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << HLT_ADDR; // halt
-  wire [CONTROL_WORD_WIDTH-1:0] c_ADV = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << ADV_ADDR; // advance instruction counter to next instruction
-  wire [CONTROL_WORD_WIDTH-1:0] c_MI  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << MI_ADDR;  // mem address reg in
-  wire [CONTROL_WORD_WIDTH-1:0] c_RI  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << RI_ADDR;  // ram data in
-  wire [CONTROL_WORD_WIDTH-1:0] c_RO  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << RO_ADDR;  // ram data out
-  wire [CONTROL_WORD_WIDTH-1:0] c_IO  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << IO_ADDR;  // instruction reg in
-  wire [CONTROL_WORD_WIDTH-1:0] c_II  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << II_ADDR;  // instruction reg out
-  wire [CONTROL_WORD_WIDTH-1:0] c_AI  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << AI_ADDR;  // A reg in
-  wire [CONTROL_WORD_WIDTH-1:0] c_AO  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << AO_ADDR;  // A reg out
-  wire [CONTROL_WORD_WIDTH-1:0] c_EO  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << EO_ADDR;  // ALU out
-  wire [CONTROL_WORD_WIDTH-1:0] c_SU  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << SU_ADDR;  // ALU Subtract
-  wire [CONTROL_WORD_WIDTH-1:0] c_EL  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << EL_ADDR;  // ALU Latch Flags
-  wire [CONTROL_WORD_WIDTH-1:0] c_BI  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << BI_ADDR;  // B Reg in
-  wire [CONTROL_WORD_WIDTH-1:0] c_OI  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << OI_ADDR;  // Output Reg in
-  wire [CONTROL_WORD_WIDTH-1:0] c_CE  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << CE_ADDR;  // Program Counter Enable (increment)
-  wire [CONTROL_WORD_WIDTH-1:0] c_CO  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << CO_ADDR;  // Program Counter Out
-  wire [CONTROL_WORD_WIDTH-1:0] c_J   = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << J_ADDR;   // Jump
-
-  input   [INSTRUCTION_WIDTH-1:0] i_instruction;
-  input          [STEP_WIDTH-1:0] i_step;
-  input                           i_zero;
-  input                           i_carry;
-  input                           i_odd;
-
-  output wire                     o_halt;         // halt
-  output wire                     o_adv;          // advance instruction counter to next instruction
-  output wire                     o_memaddri;     // mem address reg in
-  output wire                     o_rami;         // ram data in
-  output wire                     o_ramo;         // ram data out
-  output wire                     o_instrregi;    // instruction reg in
-  output wire                     o_instrrego;    // instruction reg out
-  output wire                     o_aregi;        // A reg in
-  output wire                     o_arego;        // A reg out
-  output wire                     o_aluo;         // ALU out
-  output wire                     o_alusub;       // ALU Subtract
-  output wire                     o_alulatchf;    // ALU Latch Flags
-  output wire                     o_bregi;        // B Reg in
-  output wire                     o_oregi;        // Output Reg in
-  output wire                     o_programcnten; // Program Counter Enable (increment)
-  output wire                     o_programcnto;  // Program Counter Out
-  output wire                     o_jump;         // Jump
+  localparam [CONTROL_WORD_WIDTH-1:0] c_HLT = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << HLT_ADDR; // halt
+  localparam [CONTROL_WORD_WIDTH-1:0] c_ADV = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << ADV_ADDR; // advance instruction counter to next instruction
+  localparam [CONTROL_WORD_WIDTH-1:0] c_MI  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << MI_ADDR;  // mem address reg in
+  localparam [CONTROL_WORD_WIDTH-1:0] c_RI  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << RI_ADDR;  // ram data in
+  localparam [CONTROL_WORD_WIDTH-1:0] c_RO  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << RO_ADDR;  // ram data out
+  localparam [CONTROL_WORD_WIDTH-1:0] c_IO  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << IO_ADDR;  // instruction reg in
+  localparam [CONTROL_WORD_WIDTH-1:0] c_II  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << II_ADDR;  // instruction reg out
+  localparam [CONTROL_WORD_WIDTH-1:0] c_AI  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << AI_ADDR;  // A reg in
+  localparam [CONTROL_WORD_WIDTH-1:0] c_AO  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << AO_ADDR;  // A reg out
+  localparam [CONTROL_WORD_WIDTH-1:0] c_EO  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << EO_ADDR;  // ALU out
+  localparam [CONTROL_WORD_WIDTH-1:0] c_SU  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << SU_ADDR;  // ALU Subtract
+  localparam [CONTROL_WORD_WIDTH-1:0] c_EL  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << EL_ADDR;  // ALU Latch Flags
+  localparam [CONTROL_WORD_WIDTH-1:0] c_BI  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << BI_ADDR;  // B Reg in
+  localparam [CONTROL_WORD_WIDTH-1:0] c_OI  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << OI_ADDR;  // Output Reg in
+  localparam [CONTROL_WORD_WIDTH-1:0] c_CE  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << CE_ADDR;  // Program Counter Enable (increment)
+  localparam [CONTROL_WORD_WIDTH-1:0] c_CO  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << CO_ADDR;  // Program Counter Out
+  localparam [CONTROL_WORD_WIDTH-1:0] c_J   = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << J_ADDR;   // Jump
 
   wire   [CONTROL_WORD_WIDTH-1:0] control_word;
 

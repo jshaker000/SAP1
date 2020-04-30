@@ -3,15 +3,14 @@
 // clock by a factor of say 100 million if you are running on an FPGA
 // For simulation, clock enable can always be 1
 
-module Clock_Enable (
-  mclk,
-  mclk_en
-);
+`default_nettype none
 
+module Clock_Enable (
 /* verilator lint_off UNUSED */
-  input  mclk;
+  input  wire mclk,
 /* verilator lint_on UNUSED */
-  output mclk_en;
+  output wire mclk_en
+);
 
   assign mclk_en = 1'b1;
 

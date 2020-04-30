@@ -2,32 +2,29 @@
 // Can optionally latch its flags, which can be used as inputs to the
 // Instruction decoding for JIZ instructions and the like,
 
-module ALU(
-  mclk,
-  mclk_en,
-  i_latch_flags,
-  i_sub,
-  i_a,
-  i_b,
-  o_zero,
-  o_carry,
-  o_odd,
-  o_data
+`default_nettype none
+
+module ALU #(
+  parameter WIDTH = 8
+)(
+  input  wire            mclk,
+  input  wire            mclk_en,
+  input  wire            i_latch_flags,
+  input  wire            i_sub,
+  input  wire [WIDTH-1:0] i_a,
+  input  wire [WIDTH-1:0] i_b,
+
+  output reg              o_zero,
+  output reg              o_carry,
+  output reg              o_odd,
+  output wire [WIDTH-1:0] o_data
 );
 
-  parameter WIDTH = 8;
-
-  input              mclk;
-  input              mclk_en;
-  input              i_latch_flags;
-  input              i_sub;
-  input  [WIDTH-1:0] i_a;
-  input  [WIDTH-1:0] i_b;
-
-  output reg         o_zero  = 0;
-  output reg         o_carry = 0;
-  output reg         o_odd   = 0;
-  output [WIDTH-1:0] o_data;
+  initial begin
+    o_zero  = 1'b0;
+    o_carry = 1'b0;
+    o_odd   = 1'b0;
+  end
 
   wire           latch  = mclk_en & i_latch_flags;
   wire [WIDTH:0] result = (i_sub == 1'b0) ? i_a + i_b : i_a - i_b;
