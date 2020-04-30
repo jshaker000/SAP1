@@ -94,55 +94,55 @@ module Instruction_Decoder #(
   assign control_word = // fetch, put prgm cntr in mem addr, fetch instruction, advance PC. All instructions start like this
                  i_step == 'h0 ? c_MI | c_CO        :
                  i_step == 'h1 ? c_RO | c_II | c_CE :
-                // i_instruction == 'h0 ? // unimplemented - defaults at bottom to NOP
-                   i_instruction == 'h1 ? // LDA - put data in RAM addr in A
+                // i_instruction == 4'h00 ? // unimplemented - defaults at bottom to NOP
+                   i_instruction == 4'h01 ? // LDA - put data in RAM addr in A
                      i_step == 'h2      ? c_IO | c_MI        :
                      i_step == 'h3      ? c_RO | c_AI        :
                      c_ADV :
-                    i_instruction == 'h2 ? // ADD - add data from RAM addr to A
-                      i_step == 'h2      ? c_IO | c_MI        :
-                      i_step == 'h3      ? c_RO | c_BI        :
-                      i_step == 'h4      ? c_EO | c_AI | c_EL :
-                      c_ADV :
-                    i_instruction == 'h3 ? // SUBTRACT - subtract data from RAM addr to A
-                      i_step == 'h2      ? c_IO | c_MI        :
-                      i_step == 'h3      ? c_RO | c_BI        :
-                      i_step == 'h4      ? c_EO | c_SU | c_AI | c_EL :
-                      c_ADV :
-                    i_instruction == 'h4 ? // LDI - load an immediate 4 bit value to A
-                      i_step == 'h2      ? c_IO | c_AI        :
-                      c_ADV :
-                    i_instruction == 'h5 ? // ADDI - add an immediate 4 bit value to A
-                      i_step == 'h2      ? c_IO | c_BI        :
-                      i_step == 'h3      ? c_EO | c_AI | c_EL :
-                      c_ADV :
-                    i_instruction == 'h6 ? // SUBTRACTI - subtract an immediate 4 bit value from A
-                      i_step == 'h2      ? c_IO | c_BI        :
-                      i_step == 'h3      ? c_EO | c_SU | c_AI | c_EL :
-                      c_ADV :
-                    i_instruction == 'h7 ? // STA - store A in RAM
-                      i_step == 'h2      ? c_IO | c_MI :
-                      i_step == 'h3      ? c_AO | c_RI :
-                      c_ADV :
-                    i_instruction == 'h8 ? // JMP - jump to ADDR
-                      i_step == 'h2      ? c_IO | c_J  :
-                      c_ADV :
-                    i_instruction == 'h9 ? // JIZ - jump to ADDR if last ALU op was 0
-                      i_step == 'h2      ? i_zero  ? (c_IO | c_J) : c_ADV :
-                      c_ADV :
-                    i_instruction == 'ha ? // JIC - jump to ADDR if last ALU op carried
-                      i_step == 'h2      ? i_carry ? (c_IO | c_J) : c_ADV :
-                      c_ADV :
-                    i_instruction == 'hb ? // JIO - jump to ADDR if last ALU op was odd
-                      i_step == 'h2      ? i_odd   ? (c_IO | c_J) : c_ADV :
-                      c_ADV :
-                 // i_instruction == 'hc ? // unimplement - defaults at bottom to NOP
-                 // i_instruction == 'hd ? // unimplement - defaults at bottom to NOP
-                    i_instruction == 'he ? // OUT - copy Areg to out reg
-                      i_step == 'h2      ? c_AO | c_OI :
-                      c_ADV :
-                    i_instruction == 'hf ? // HALT PROGRAM
-                      c_HLT :
-                    c_ADV;                 // NOP - do nothing and just advance counter
+                   i_instruction == 4'h02 ? // ADD - add data from RAM addr to A
+                     i_step == 'h2      ? c_IO | c_MI        :
+                     i_step == 'h3      ? c_RO | c_BI        :
+                     i_step == 'h4      ? c_EO | c_AI | c_EL :
+                     c_ADV :
+                   i_instruction == 4'h03 ? // SUBTRACT - subtract data from RAM addr to A
+                     i_step == 'h2      ? c_IO | c_MI        :
+                     i_step == 'h3      ? c_RO | c_BI        :
+                     i_step == 'h4      ? c_EO | c_SU | c_AI | c_EL :
+                     c_ADV :
+                   i_instruction == 4'h04 ? // LDI - load an immediate 4 bit value to A
+                     i_step == 'h2      ? c_IO | c_AI        :
+                     c_ADV :
+                   i_instruction == 4'h05 ? // ADDI - add an immediate 4 bit value to A
+                     i_step == 'h2      ? c_IO | c_BI        :
+                     i_step == 'h3      ? c_EO | c_AI | c_EL :
+                     c_ADV :
+                   i_instruction == 4'h06 ? // SUBTRACTI - subtract an immediate 4 bit value from A
+                     i_step == 'h2      ? c_IO | c_BI        :
+                     i_step == 'h3      ? c_EO | c_SU | c_AI | c_EL :
+                     c_ADV :
+                   i_instruction == 4'h07 ? // STA - store A in RAM
+                     i_step == 'h2      ? c_IO | c_MI :
+                     i_step == 'h3      ? c_AO | c_RI :
+                     c_ADV :
+                   i_instruction == 4'h08 ? // JMP - jump to ADDR
+                     i_step == 'h2      ? c_IO | c_J  :
+                     c_ADV :
+                   i_instruction == 4'h09 ? // JIZ - jump to ADDR if last ALU op was 0
+                     i_step == 'h2      ? i_zero  ? (c_IO | c_J) : c_ADV :
+                     c_ADV :
+                   i_instruction == 4'h0a ? // JIC - jump to ADDR if last ALU op carried
+                     i_step == 'h2      ? i_carry ? (c_IO | c_J) : c_ADV :
+                     c_ADV :
+                   i_instruction == 4'h0b ? // JIO - jump to ADDR if last ALU op was odd
+                     i_step == 'h2      ? i_odd   ? (c_IO | c_J) : c_ADV :
+                     c_ADV :
+                 // i_instruction == 4'h0c ? // unimplement - defaults at bottom to NOP
+                 // i_instruction == 4'h0d ? // unimplement - defaults at bottom to NOP
+                   i_instruction == 4'h0e ? // OUT - copy Areg to out reg
+                     i_step == 'h2      ? c_AO | c_OI :
+                     c_ADV :
+                   i_instruction == 4'h0f ? // HALT PROGRAM
+                     c_HLT :
+                     c_ADV;                 // NOP - do nothing and just advance counter
 
 endmodule
