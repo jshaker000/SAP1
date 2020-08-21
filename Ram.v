@@ -21,7 +21,7 @@ module Ram #(
     $readmemh(FILE, ram);
   end
 
-  always @(posedge mclk) if (write) ram[i_address] <= i_load_data;
+  always @(posedge mclk) ram[i_address] <= write ? i_load_data : ram[i_address];
 
   assign o_data = ram[i_address];
 
