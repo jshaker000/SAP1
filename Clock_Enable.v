@@ -11,6 +11,7 @@
    * reg [COUNT_W-1:0] clock_cnt = DIV_RATIO_M1;
    * wire next_pulse = clock_cnt == {COUNT_W{1'b0}};
    * always @(posedge mclk) clock_cnt <= next_pulse ? DIV_RATIO_M1 : clock_cnt - {{COUNT_W-1{1'b0}}, 1'b1};
+   * assign mcl_en = next_pulse;
   */
 
 `default_nettype none
