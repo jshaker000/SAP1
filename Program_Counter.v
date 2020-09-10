@@ -21,8 +21,7 @@ module Program_Counter #(
 
   wire               update_counter = mclk_en & ~i_halt;
 
-  always @(posedge mclk) counter <= update_counter ? counter_next :
-                                    counter;
+  always @(posedge mclk) counter <= update_counter ? counter_next : counter;
 
   assign o_data = counter;
 

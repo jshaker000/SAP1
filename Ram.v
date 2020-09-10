@@ -1,5 +1,9 @@
 `default_nettype none
 
+// Load ram from file, then allow Ram to be addressed for reading / writing. This is single port Ram
+// (meaning that the same address is used for reading and writing) and it is NOT write through
+// (meaning reading / writing simultaneously will read the old data and write the new data
+
 module Ram #(
   parameter  RAM_DEPTH  = 16,
   parameter  WIDTH      =  8,

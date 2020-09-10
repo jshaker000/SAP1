@@ -21,7 +21,6 @@ module Out #(
 
   wire load = mclk_en & i_load_enable;
 
-  always @(posedge mclk) o_data <= load ? i_load_data :
-                                   o_data;
+  always @(posedge mclk) o_data <= load ? i_load_data : o_data;
 
 endmodule
