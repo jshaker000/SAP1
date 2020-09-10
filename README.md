@@ -30,6 +30,7 @@ At the beginning, the program counter and Instruction Counter are both initializ
 The Instruction Counter will increment on every Clock.
 
 At the 1st and 2nd step (the value 0 and value 1 of the Instruction Counter) for every instruction
+
     0. The Program Counter gets put onto the Bus, and Read in by the Memory Address Register
     1. The Value from RAM is output to the Bus, and Read in by the Instruction Register. The Program Counter is incremented by 1 to prepare for the next instruction.
 
@@ -38,6 +39,7 @@ Each Instruction is made of 2 4-bit bit fields: the 4-bit OP Code and the 4-bit 
 The OpCode is combined with the Instruction Counter in the InstructionDecode module to produce appropriate control words for the remaining steps.
 
 IE: LDA 15 (0x1F)
+
    2. Put 15 (F) [the argument] onto the bus, and load it into the Memory Address Register
    3. Put the output of RAM onto the bus, and load it into the A Register
    4. Set the Instruction Counter to 0. (The Program counter was already incremented, so this will start execution of the next instruction).
@@ -66,6 +68,8 @@ I added a Clock Enable line. The idea is that if someone wants to synthesize and
 real FPGA the clock would be far too fast. So you can use the Clock Enable Module to divide the
 clock, or if you are comfortable with synchronizers and debouncing to manually toggle the clock.
 It is safer to send the clock everywhere with an enable then to gate the clock directly using gates.
+
+See the Clock Enable Module for an example.
 
 ### Instruction Counter
 Changed from negedge to posedge so logic can run faster. Works just aswell, and no other design changes were needed.
@@ -99,12 +103,15 @@ Then, if your program doesn't exit out, you will know that it succeeded - and vi
 You can make more benches and update the makefile appropriately if you like.
 
 ## Further Work
+
 ### Extending to 16 bits and beyond
 Most of the design is parameterized so it should be pretty easy to exend bitwidths, etc. I'd love to
 see what you make but likely will leave this repo as the "base" computer.
+
 ### Compiler
 I'd love to make some scripts that take plain text and can compile to both Instruction\_Decoder.v and also use that file
-to convert instructions into the ram file.
+to convert instructions into the ram file. Especially if we add a Stack, then having a compiler to automate function calling would be very nice
+
 ### Improve the GUI
 Right now the Ncurses interface is a bit of a hack, I'd love to clean it up or possibly do a full GUI with QT or SDL or something.
 Ideas I also has would be to have a key to pull up the entire contents of ram, to inject contents into RAM,
@@ -112,16 +119,28 @@ and also to maybe have a key file to convert what's in the instruction register 
 
 ### FPGA Implementation
 #### Output Module
+You could implement a pipelined Double-Dabble Module and tie that output then the 7seg decoder. Many FPGAs then will have a scheme
+that you enable only one Seven Seg Digit at a time, so you'll need a fast clock to shift through each BCD digit and drive it quick enough that it looks
+like they are all being held at once.
+
 I didnt want to go through the trouble of making a binary to bcd converter then bd to 7seg.
-Also, each FPGA will have a different port config to drive the 7segs (shift registers, act high, act low).
+Also, each FPGA will have a different port config to drive the 7segs (shift registers, active high, active low).
 So that is an open excercise.
-Currently, I am able to synthesize this design on Vivado when I map out\_data to a handful of LEDs.
+Currently, I am able to synthesize this design on Vivado when I map out\_data to a handful of LEDs. (The whole design will be optimized out if there is no
+output port)
+
 #### Reset Line
 Some ability to reset everyhting -> perhaps also have  "backup ram (functionally rom)" and some bootstrapping module to copy the backup ram
 back into the main ram to easily restart
+
 #### UART RAM Programming
-Some way to reprogram the RAM from a computer so that we dont have to reelaborate and synthesisize and all each time.
-Obviously that wont cover RTL changes though.
+Some way to reprogram the RAM from a computer / live so that we dont have to reelaborate and synthesisize and all each time would be nice.
+Perhaps having a UART controller listen to a control word that turns the computer into RESET mode, allows you to program the RAM, and then lifts reset mode.
+I don't think this would be too hard, honestly. This could be a plausible alternative to a reset line and having a backup Ram.
+
+
+#### Add a Stack / other functionatilty
+Self explanatory.
 
 ## Screenshots
 
