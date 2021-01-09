@@ -8,8 +8,8 @@
 module Out #(
   parameter WIDTH = 8
 )(
-  input                    mclk,
-  input                    mclk_en,
+  input                    clk,
+  input                    clk_en,
   input                    i_load_enable,
   input        [WIDTH-1:0] i_load_data,
   output reg   [WIDTH-1:0] o_data
@@ -19,8 +19,8 @@ module Out #(
     o_data = {WIDTH{1'b0}};
   end
 
-  wire load = mclk_en & i_load_enable;
+  wire load = clk_en & i_load_enable;
 
-  always @(posedge mclk) o_data <= load ? i_load_data : o_data;
+  always @(posedge clk) o_data <= load ? i_load_data : o_data;
 
 endmodule

@@ -6,8 +6,8 @@ module Instruction_Counter #(
   parameter  INSTRUCTION_STEPS = 8,
   localparam STEP_WIDTH        = $clog2(INSTRUCTION_STEPS)
 )(
-  input wire mclk,
-  input wire mclk_en,
+  input wire clk,
+  input wire clk_en,
   input wire i_adv,
   input wire i_halt,
 
@@ -16,12 +16,12 @@ module Instruction_Counter #(
   reg    [STEP_WIDTH-1:0] counter = {STEP_WIDTH{1'b0}};
 
   wire counter_max    = counter == (INSTRUCTION_STEPS[STEP_WIDTH-1:0] - 'd1);
-  wire update_counter = mclk_en & ~i_halt;
+  wire update_counter = clk_en & ~i_halt;
   wire reset_counter  = i_adv | counter_max;
 
   wire [STEP_WIDTH-1:0] counter_next = reset_counter ? {STEP_WIDTH{1'b0}} : counter + {{STEP_WIDTH-1{1'b0}}, 1'b1};
 
-  always @(posedge mclk) counter <= update_counter ? counter_next : counter;
+  always @(posedge clk) counter <= update_counter ? counter_next : counter;
 
   assign o_data = counter;
 endmodule

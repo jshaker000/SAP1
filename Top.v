@@ -22,13 +22,13 @@ module Top #(
   localparam ADDRESS_WIDTH             = $clog2(RAM_DEPTH),
   localparam INSTRUCTION_COUNTER_WIDTH = $clog2(INSTRUCTION_STEPS)
 )(
-  input wire mclk,
+  input wire clk,
   output wire [OUT_WIDTH-1:0] out_data
 );
 
 /*------------------BEGIN INTERCONNECTS----------------------------------*/
   // clock enable
-  wire  mclk_en;
+  wire  clk_en;
 
   // Instruction Decoder
   wire halt;         // halt
@@ -84,8 +84,8 @@ module Top #(
 /*-------------------END INTERCONNECTS-----------------------------------*/
 
   Clock_Enable inst_Clock_Enable(
-    .mclk   (mclk),
-    .mclk_en(mclk_en)
+    .clk   (clk),
+    .clk_en(clk_en)
   );
 
   Instruction_Decoder #(
@@ -144,8 +144,8 @@ module Top #(
   Program_Counter #(
     .WIDTH(PROGRAM_COUNTER_WIDTH)
   ) inst_Program_Counter (
-    .mclk            (mclk),
-    .mclk_en         (mclk_en),
+    .clk            (clk),
+    .clk_en         (clk_en),
     .i_counter_enable(programcnten),
     .i_halt          (halt),
     .i_load_enable   (jump),
@@ -156,8 +156,8 @@ module Top #(
   Instruction_Counter #(
     .INSTRUCTION_STEPS(INSTRUCTION_STEPS)
   ) inst_Instruction_Counter (
-    .mclk   (mclk),
-    .mclk_en(mclk_en),
+    .clk   (clk),
+    .clk_en(clk_en),
     .i_halt (halt),
     .i_adv  (adv),
     .o_data (instruction_counter)
@@ -166,8 +166,8 @@ module Top #(
   Register #(
     .WIDTH(INSTRUCTION_REGISTER_WIDTH)
   ) inst_Register_Instruction (
-    .mclk         (mclk),
-    .mclk_en      (mclk_en),
+    .clk         (clk),
+    .clk_en      (clk_en),
     .i_load_enable(instrregi),
     .i_load_data  (bus_out[INSTRUCTION_REGISTER_WIDTH-1:0]),
     .o_data       (instruction_reg)
@@ -176,8 +176,8 @@ module Top #(
   Register #(
     .WIDTH(ADDRESS_WIDTH)
   ) inst_Register_Memory_Address (
-    .mclk         (mclk),
-    .mclk_en      (mclk_en),
+    .clk         (clk),
+    .clk_en      (clk_en),
     .i_load_enable(memaddri),
     .i_load_data  (bus_out[ADDRESS_WIDTH-1:0]),
     .o_data       (memory_address)
@@ -188,8 +188,8 @@ module Top #(
     .WIDTH    (RAM_WIDTH),
     .FILE     ("ram.hex")
   ) inst_Ram (
-    .mclk         (mclk),
-    .mclk_en      (mclk_en),
+    .clk         (clk),
+    .clk_en      (clk_en),
     .i_address    (memory_address),
     .i_load_enable(rami),
     .i_load_data  (bus_out[RAM_WIDTH-1:0]),
@@ -199,8 +199,8 @@ module Top #(
   Register #(
     .WIDTH(A_REG_WIDTH)
   ) inst_Register_A (
-    .mclk         (mclk),
-    .mclk_en      (mclk_en),
+    .clk         (clk),
+    .clk_en      (clk_en),
     .i_load_enable(aregi),
     .i_load_data  (bus_out[A_REG_WIDTH-1:0]),
     .o_data       (a_reg)
@@ -209,8 +209,8 @@ module Top #(
   Register #(
     .WIDTH(B_REG_WIDTH)
   ) inst_Register_B (
-    .mclk         (mclk),
-    .mclk_en      (mclk_en),
+    .clk         (clk),
+    .clk_en      (clk_en),
     .i_load_enable(bregi),
     .i_load_data  (bus_out[B_REG_WIDTH-1:0]),
     .o_data       (b_reg)
@@ -219,8 +219,8 @@ module Top #(
   ALU #(
     .WIDTH(ALU_WIDTH)
   ) inst_ALU (
-    .mclk         (mclk),
-    .mclk_en      (mclk_en),
+    .clk         (clk),
+    .clk_en      (clk_en),
     .i_latch_flags(alulatchf),
     .i_sub        (alusub),
     .i_a          (a_reg),
@@ -234,8 +234,8 @@ module Top #(
   Out #(
     .WIDTH(OUT_WIDTH)
   ) inst_Out (
-    .mclk         (mclk),
-    .mclk_en      (mclk_en),
+    .clk         (clk),
+    .clk_en      (clk_en),
     .i_load_enable(oregi),
     .i_load_data  (bus_out[OUT_WIDTH-1:0]),
     .o_data       (out_data)

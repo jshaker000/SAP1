@@ -3,8 +3,8 @@
 module Program_Counter #(
   parameter WIDTH = 4
 )(
-  input  wire             mclk,
-  input  wire             mclk_en,
+  input  wire             clk,
+  input  wire             clk_en,
   input  wire             i_counter_enable,
   input  wire             i_halt,
   input  wire             i_load_enable,
@@ -19,9 +19,9 @@ module Program_Counter #(
                                       i_counter_enable ? counter + {{WIDTH-1{1'b0}}, 1'b1} :
                                       counter;
 
-  wire               update_counter = mclk_en & ~i_halt;
+  wire               update_counter = clk_en & ~i_halt;
 
-  always @(posedge mclk) counter <= update_counter ? counter_next : counter;
+  always @(posedge clk) counter <= update_counter ? counter_next : counter;
 
   assign o_data = counter;
 

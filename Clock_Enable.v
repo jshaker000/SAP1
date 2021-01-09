@@ -10,7 +10,7 @@
    * localparam COUNT_W      = $clog2(DIV_RATIO);
    * reg [COUNT_W-1:0] clock_cnt = DIV_RATIO_M1;
    * wire next_pulse = clock_cnt == {COUNT_W{1'b0}};
-   * always @(posedge mclk) clock_cnt <= next_pulse ? DIV_RATIO_M1 : clock_cnt - {{COUNT_W-1{1'b0}}, 1'b1};
+   * always @(posedge clk) clock_cnt <= next_pulse ? DIV_RATIO_M1 : clock_cnt - {{COUNT_W-1{1'b0}}, 1'b1};
    * assign mcl_en = next_pulse;
   */
 
@@ -18,10 +18,10 @@
 
 module Clock_Enable (
 /* verilator lint_off UNUSED */
-  input  wire mclk,
+  input  wire clk,
 /* verilator lint_on UNUSED */
-  output wire mclk_en
+  output wire clk_en
 );
 
-  assign mclk_en = 1'b1;
+  assign clk_en = 1'b1;
 endmodule
