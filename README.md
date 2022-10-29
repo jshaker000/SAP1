@@ -41,8 +41,7 @@ The OpCode is combined with the Instruction Counter in the InstructionDecode mod
 IE: LDA 15 (0x1F)
 
    2. Put 15 (F) [the argument] onto the bus, and load it into the Memory Address Register
-   3. Put the output of RAM onto the bus, and load it into the A Register
-   4. Set the Instruction Counter to 0. (The Program counter was already incremented, so this will start execution of the next instruction).
+   3. Put the output of RAM onto the bus, and load it into the A Register, also the Instruction Counter to 0 to start execution of the next instruction
 
 This effectively copies the value RAM[Argument] into the A Register. Other instructions work similarly.
 Its always an interesting decision to figure out how much you want to implement in hardware vs software, to try to help keep the other simple.
