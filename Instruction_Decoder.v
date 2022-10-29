@@ -78,6 +78,6 @@ module Instruction_Decoder (
                      c_ADV :
                    i_instruction == 4'h0f ? // HALT PROGRAM
                      c_HLT :
-                     c_ADV;                 // NOP - do nothing and just advance counter
+                   c_ADV;                 // NOP - do nothing and just advance counter
 
 endmodule
