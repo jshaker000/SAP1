@@ -1,0 +1,58 @@
+/* verilator lint_off UNUSED */
+  // pnemonics for control words
+  localparam CONTROL_WORD_WIDTH = 17;
+
+  localparam HLT_POS = 16; // Halt
+  localparam ADV_POS = 15; // Advance Instruction Counter to Next Instruction
+
+  localparam MI_POS  = 14; // mem address reg in
+
+  localparam RI_POS  = 13; // ram data in
+  localparam RO_POS  = 12; // ram data out
+
+  localparam II_POS  = 11; // instruction reg out
+  localparam IO_POS  = 10; // instruction reg in
+
+  localparam AI_POS  = 9; // a register in
+  localparam AO_POS  = 8; // a register out
+
+  localparam EO_POS  = 7; // alu out
+  localparam SU_POS  = 6; // alu subtract
+  localparam EL_POS  = 5; // alu latch flags
+
+  localparam BI_POS  = 4; // b register in
+
+  localparam OI_POS  = 3; // out register in
+
+  localparam CE_POS  = 2; // program counter enable (increment)
+  localparam CO_POS  = 1; // program counter out
+
+  localparam J_POS   = 0; // jump
+
+  localparam [CONTROL_WORD_WIDTH-1:0] c_HLT = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << HLT_POS; // halt
+  localparam [CONTROL_WORD_WIDTH-1:0] c_ADV = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << ADV_POS; // advance instruction counter to next instruction
+
+  localparam [CONTROL_WORD_WIDTH-1:0] c_MI  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << MI_POS;  // mem address reg in
+
+  localparam [CONTROL_WORD_WIDTH-1:0] c_RI  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << RI_POS;  // ram data in
+  localparam [CONTROL_WORD_WIDTH-1:0] c_RO  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << RO_POS;  // ram data out
+
+  localparam [CONTROL_WORD_WIDTH-1:0] c_II  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << II_POS;  // instruction reg in
+  localparam [CONTROL_WORD_WIDTH-1:0] c_IO  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << IO_POS;  // instruction reg out
+
+  localparam [CONTROL_WORD_WIDTH-1:0] c_AI  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << AI_POS;  // A reg in
+  localparam [CONTROL_WORD_WIDTH-1:0] c_AO  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << AO_POS;  // A reg out
+
+  localparam [CONTROL_WORD_WIDTH-1:0] c_EO  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << EO_POS;  // ALU out
+  localparam [CONTROL_WORD_WIDTH-1:0] c_SU  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << SU_POS;  // ALU Subtract
+  localparam [CONTROL_WORD_WIDTH-1:0] c_EL  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << EL_POS;  // ALU Latch Flags
+
+  localparam [CONTROL_WORD_WIDTH-1:0] c_BI  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << BI_POS;  // B Reg in
+
+  localparam [CONTROL_WORD_WIDTH-1:0] c_OI  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << OI_POS;  // Output Reg in
+
+  localparam [CONTROL_WORD_WIDTH-1:0] c_CE  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << CE_POS;  // Program Counter Enable (increment)
+  localparam [CONTROL_WORD_WIDTH-1:0] c_CO  = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << CO_POS;  // Program Counter Out
+
+  localparam [CONTROL_WORD_WIDTH-1:0] c_J   = {{CONTROL_WORD_WIDTH-1{1'b0}},1'b1} << J_POS;   // Jump
+/* verilator lint_on UNUSED */

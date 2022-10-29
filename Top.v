@@ -17,7 +17,6 @@ module Top #(
 
   parameter INSTRUCTION_WIDTH  = 4,
   parameter INSTRUCTION_STEPS  = 8,
-  parameter CONTROL_WORD_WIDTH = 17,
 
   localparam ADDRESS_WIDTH             = $clog2(RAM_DEPTH),
   localparam INSTRUCTION_COUNTER_WIDTH = $clog2(INSTRUCTION_STEPS)
@@ -26,28 +25,15 @@ module Top #(
   output wire [OUT_WIDTH-1:0] out_data
 );
 
+  `include "instructions.vi"
+
+
 /*------------------BEGIN INTERCONNECTS----------------------------------*/
   // clock enable
   wire  clk_en;
 
   // Instruction Decoder
-  wire halt;         // halt
-  wire adv;          // advance instruction counter to next instruction
-  wire memaddri;     // mem address reg in
-  wire rami;         // ram data in
-  wire ramo;         // ram data out
-  wire instrregi;    // instruction reg in
-  wire instrrego;    // instruction reg out
-  wire aregi;        // A reg in
-  wire arego;        // A reg out
-  wire aluo;         // ALU out
-  wire alusub;       // ALU Subtract
-  wire alulatchf;    // ALU Latch Flags
-  wire bregi;        // B Reg in
-  wire oregi;        // Output Reg in
-  wire programcnten; // Program Counter Enable (increment)
-  wire programcnto;  // Program Counter Out
-  wire jump;         // Jump
+  wire [CONTROL_WORD_WIDTH-1:0] control_word;
 
   // bus
   wire                         [BUS_WIDTH-1:0] bus_out;
@@ -90,31 +76,14 @@ module Top #(
 
   Instruction_Decoder #(
     .INSTRUCTION_WIDTH(INSTRUCTION_WIDTH),
-    .INSTRUCTION_STEPS(INSTRUCTION_STEPS),
-    .CONTROL_WORD_WIDTH(CONTROL_WORD_WIDTH)
+    .INSTRUCTION_STEPS(INSTRUCTION_STEPS)
   ) inst_Instruction_Decoder(
       .i_instruction (instruction),
       .i_step        (instruction_counter),
       .i_zero        (zero),
       .i_carry       (carry),
       .i_odd         (odd),
-      .o_halt        (halt),
-      .o_adv         (adv),
-      .o_memaddri    (memaddri),
-      .o_rami        (rami),
-      .o_ramo        (ramo),
-      .o_instrregi   (instrregi),
-      .o_instrrego   (instrrego),
-      .o_aregi       (aregi),
-      .o_arego       (arego),
-      .o_aluo        (aluo),
-      .o_alusub      (alusub),
-      .o_alulatchf   (alulatchf),
-      .o_bregi       (bregi),
-      .o_oregi       (oregi),
-      .o_programcnten(programcnten),
-      .o_programcnto (programcnto),
-      .o_jump        (jump)
+      .o_control_word(control_word)
   );
 
   Bus #(
@@ -126,17 +95,17 @@ module Top #(
     .INSTRUCTION_REG_OUT_WIDTH(INSTRUCTION_REGISTER_OUT_WIDTH),
     .PROGRAM_COUNTER_OUT_WIDTH(PROGRAM_COUNTER_WIDTH)
   ) inst_Bus (
-    .i_a_reg_out           (arego),
+    .i_a_reg_out           (control_word[AO_POS]),
     .i_a_reg_data          (a_reg),
     .i_b_reg_out           (1'b0),
     .i_b_reg_data          (b_reg),
-    .i_alu_out             (aluo),
+    .i_alu_out             (control_word[EO_POS]),
     .i_alu_data            (alu_data),
-    .i_ram_out             (ramo),
+    .i_ram_out             (control_word[RO_POS]),
     .i_ram_data            (ram_data),
-    .i_instruction_reg_out (instrrego),
+    .i_instruction_reg_out (control_word[IO_POS]),
     .i_instruction_reg_data(instruction_reg_to_bus),
-    .i_program_counter_out (programcnto),
+    .i_program_counter_out (control_word[CO_POS]),
     .i_program_counter_data(program_counter),
     .o_bus_out             (bus_out)
   );
@@ -146,9 +115,9 @@ module Top #(
   ) inst_Program_Counter (
     .clk            (clk),
     .clk_en         (clk_en),
-    .i_counter_enable(programcnten),
-    .i_halt          (halt),
-    .i_load_enable   (jump),
+    .i_counter_enable(control_word[CE_POS]),
+    .i_halt          (control_word[HLT_POS]),
+    .i_load_enable   (control_word[J_POS]),
     .i_load_data     (bus_out[PROGRAM_COUNTER_WIDTH-1:0]),
     .o_data          (program_counter)
   );
@@ -156,19 +125,19 @@ module Top #(
   Instruction_Counter #(
     .INSTRUCTION_STEPS(INSTRUCTION_STEPS)
   ) inst_Instruction_Counter (
-    .clk   (clk),
-    .clk_en(clk_en),
-    .i_halt (halt),
-    .i_adv  (adv),
+    .clk    (clk),
+    .clk_en (clk_en),
+    .i_halt (control_word[HLT_POS]),
+    .i_adv  (control_word[ADV_POS]),
     .o_data (instruction_counter)
   );
 
   Register #(
     .WIDTH(INSTRUCTION_REGISTER_WIDTH)
   ) inst_Register_Instruction (
-    .clk         (clk),
-    .clk_en      (clk_en),
-    .i_load_enable(instrregi),
+    .clk          (clk),
+    .clk_en       (clk_en),
+    .i_load_enable(control_word[II_POS]),
     .i_load_data  (bus_out[INSTRUCTION_REGISTER_WIDTH-1:0]),
     .o_data       (instruction_reg)
   );
@@ -176,9 +145,9 @@ module Top #(
   Register #(
     .WIDTH(ADDRESS_WIDTH)
   ) inst_Register_Memory_Address (
-    .clk         (clk),
-    .clk_en      (clk_en),
-    .i_load_enable(memaddri),
+    .clk          (clk),
+    .clk_en       (clk_en),
+    .i_load_enable(control_word[MI_POS]),
     .i_load_data  (bus_out[ADDRESS_WIDTH-1:0]),
     .o_data       (memory_address)
   );
@@ -188,10 +157,10 @@ module Top #(
     .WIDTH    (RAM_WIDTH),
     .FILE     ("ram.hex")
   ) inst_Ram (
-    .clk         (clk),
-    .clk_en      (clk_en),
+    .clk          (clk),
+    .clk_en       (clk_en),
     .i_address    (memory_address),
-    .i_load_enable(rami),
+    .i_load_enable(control_word[RI_POS]),
     .i_load_data  (bus_out[RAM_WIDTH-1:0]),
     .o_data       (ram_data)
   );
@@ -199,9 +168,9 @@ module Top #(
   Register #(
     .WIDTH(A_REG_WIDTH)
   ) inst_Register_A (
-    .clk         (clk),
-    .clk_en      (clk_en),
-    .i_load_enable(aregi),
+    .clk          (clk),
+    .clk_en       (clk_en),
+    .i_load_enable(control_word[AI_POS]),
     .i_load_data  (bus_out[A_REG_WIDTH-1:0]),
     .o_data       (a_reg)
   );
@@ -209,9 +178,9 @@ module Top #(
   Register #(
     .WIDTH(B_REG_WIDTH)
   ) inst_Register_B (
-    .clk         (clk),
-    .clk_en      (clk_en),
-    .i_load_enable(bregi),
+    .clk          (clk),
+    .clk_en       (clk_en),
+    .i_load_enable(control_word[BI_POS]),
     .i_load_data  (bus_out[B_REG_WIDTH-1:0]),
     .o_data       (b_reg)
   );
@@ -219,10 +188,10 @@ module Top #(
   ALU #(
     .WIDTH(ALU_WIDTH)
   ) inst_ALU (
-    .clk         (clk),
-    .clk_en      (clk_en),
-    .i_latch_flags(alulatchf),
-    .i_sub        (alusub),
+    .clk          (clk),
+    .clk_en       (clk_en),
+    .i_latch_flags(control_word[EL_POS]),
+    .i_sub        (control_word[SU_POS]),
     .i_a          (a_reg),
     .i_b          (b_reg),
     .o_zero       (zero),
@@ -234,9 +203,9 @@ module Top #(
   Out #(
     .WIDTH(OUT_WIDTH)
   ) inst_Out (
-    .clk         (clk),
-    .clk_en      (clk_en),
-    .i_load_enable(oregi),
+    .clk          (clk),
+    .clk_en       (clk_en),
+    .i_load_enable(control_word[OI_POS]),
     .i_load_data  (bus_out[OUT_WIDTH-1:0]),
     .o_data       (out_data)
   );
@@ -245,71 +214,71 @@ module Top #(
   `ifdef verilator
     function get_halt;
       // verilator public
-      get_halt = halt;
+      get_halt = control_word[HLT_POS];
     endfunction
     function get_adv;
       // verilator public
-      get_adv = adv;
+      get_adv = control_word[ADV_POS];
     endfunction
     function get_memaddri;
       // verilator public
-      get_memaddri = memaddri;
+      get_memaddri = control_word[MI_POS];
     endfunction
     function get_rami;
       // verilator public
-      get_rami = rami;
+      get_rami = control_word[RI_POS];
     endfunction
     function get_ramo;
       // verilator public
-      get_ramo = ramo;
+      get_ramo = control_word[RO_POS];
     endfunction
     function get_instrregi;
       // verilator public
-      get_instrregi = instrregi;
+      get_instrregi = control_word[II_POS];
     endfunction
     function get_instrrego;
       // verilator public
-      get_instrrego = instrrego;
+      get_instrrego = control_word[IO_POS];
     endfunction
     function get_aregi;
       // verilator public
-      get_aregi = aregi;
+      get_aregi = control_word[AI_POS];
     endfunction
     function get_arego;
       // verilator public
-      get_arego = arego;
+      get_arego = control_word[AO_POS];
     endfunction
     function get_aluo;
       // verilator public
-      get_aluo = aluo;
+      get_aluo = control_word[EO_POS];
     endfunction
     function get_alusub;
       // verilator public
-      get_alusub = alusub;
+      get_alusub = control_word[SU_POS];
     endfunction
     function get_alulatchf;
       // verilator public
-      get_alulatchf = alulatchf;
+      get_alulatchf = control_word[EL_POS];
     endfunction
     function get_bregi;
       // verilator public
-      get_bregi = bregi;
+      get_bregi = control_word[BI_POS];
     endfunction
     function get_oregi;
       // verilator public
-      get_oregi = oregi;
+      get_oregi = control_word[OI_POS];
     endfunction
     function get_programcnten;
       // verilator public
-      get_programcnten = programcnten;
+      get_programcnten = control_word[CE_POS];
     endfunction
     function get_programcnto;
       // verilator public
-      get_programcnto = programcnto;
+      get_programcnto = control_word[CO_POS];
     endfunction
     function get_jump;
       // verilator public
-      get_jump = jump;
+      get_jump = control_word[J_POS];
     endfunction
 
     function [BUS_WIDTH-1:0] get_bus_out;
