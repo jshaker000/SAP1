@@ -444,7 +444,7 @@ int main(int argc, char**argv)
     if (halt == 1)
     {
         exit_code = 0;
-        std::cerr << "Success: Simulation Terminated successfully at a HLT at clk " << k << std::endl;
+        std::cerr << "Success: Simulation Terminated successfully at a HLT at clk " << k-1 << std::endl;
         std::cerr << "Out Register (dec): " << out_data << std::endl;
     }
     else
