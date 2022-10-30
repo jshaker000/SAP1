@@ -84,6 +84,10 @@ This means we dont have to fill each instruction with NOPs and waste cycles ther
 This is tested to work on major Linux distros. You will need to install Verilator, gcc, and
 ncurses (some distros will seperate into devel and non devel, you need the devel version).
 
+Currently, reading through `Instruction_Decoder.v` and grepping through for each `i_instruction` line is the
+best way to see the whole ISA. That, combined with some of the example programs, should help someone get started
+simulating.
+
 From there, simply running *make* should be enough to verilate, build, and run your bench.
 You should place your RAM file in "ram.hex". I've left an example in the repo.
 
