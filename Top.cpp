@@ -101,6 +101,7 @@ int main(int argc, char**argv)
     const bool dump_traces = (GetEnv("DUMPTRACES") == "1") || (GetEnv("DUMP_TRACES") == "1");
     const bool use_gui     = (GetEnv("USEGUI")     == "1") || (GetEnv("USE_GUI")     == "1");
     const std::string dp_f = (GetEnv("DUMP_F") != "") ? GetEnv("DUMP_F") : "top_trace.vcd";
+    const std::uint64_t max_steps   = (GetEnv("MAX_STEPS") != "") ? std::atoll(GetEnv("MAX_STEPS").c_str()) : 3500000;
     Verilated::commandArgs(argc,argv);
     VTop          *tb  = new VTop;
     if (tb == nullptr)
@@ -422,7 +423,7 @@ int main(int argc, char**argv)
         }
         tick(k, tb, tfp);
         k++;
-    } while (k < 100000 && (halt!=1) && !exit);
+    } while (k < max_steps && (halt!=1) && !exit);
 
     // if we exited by halting wait, if not quit immediately
     if (use_gui)
