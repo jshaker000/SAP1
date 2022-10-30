@@ -12,7 +12,7 @@ module Top #(
 
   parameter PROGRAM_COUNTER_WIDTH          = 4,
 
-  parameter RAM_DEPTH         = 16,
+  parameter RAM_DEPTH         = 2**PROGRAM_COUNTER_WIDTH,
   parameter RAM_WIDTH         = 8,
 
   parameter INSTRUCTION_WIDTH  = 4,
