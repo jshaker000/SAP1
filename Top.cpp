@@ -316,7 +316,6 @@ int main(int argc, char**argv)
         alusub       = tb->Top->get_alusub();
         alulatchf    = tb->Top->get_alulatchf();
         bregi        = tb->Top->get_bregi();
-        oregi        = tb->Top->get_oregi();
         programcnten = tb->Top->get_programcnten();
         programcnto  = tb->Top->get_programcnto();
         jump         = tb->Top->get_jump();
@@ -334,6 +333,10 @@ int main(int argc, char**argv)
         b_reg               = tb->Top->get_b_reg();
         alu_data            = tb->Top->get_alu_data();
         out_data            = tb->Top->get_out_data();
+        if (oregi) {
+          std::cout << "Out Register (dec): " << out_data << " at clk " << k-1 << std::endl;
+        }
+        oregi        = tb->Top->get_oregi();
         if (use_gui)
         {
             auto start = std::chrono::steady_clock::now();
