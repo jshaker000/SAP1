@@ -16,11 +16,11 @@
   localparam AI_POS  = 9; // a register in
   localparam AO_POS  = 8; // a register out
 
-  localparam EO_POS  = 7; // alu out
-  localparam SU_POS  = 6; // alu subtract
-  localparam EL_POS  = 5; // alu latch flags
+  localparam BI_POS  = 7; // b register in
 
-  localparam BI_POS  = 4; // b register in
+  localparam EO_POS  = 6; // alu out
+  localparam SU_POS  = 5; // alu subtract
+  localparam EL_POS  = 4; // alu latch flags
 
   localparam OI_POS  = 3; // out register in
 
