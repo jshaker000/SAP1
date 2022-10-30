@@ -18,6 +18,8 @@ module Top #(
   parameter INSTRUCTION_WIDTH  = 4,
   parameter INSTRUCTION_STEPS  = 8,
 
+  parameter FILE               = "ram.hex",
+
   localparam ADDRESS_WIDTH             = $clog2(RAM_DEPTH),
   localparam INSTRUCTION_COUNTER_WIDTH = $clog2(INSTRUCTION_STEPS)
 )(
@@ -155,7 +157,7 @@ module Top #(
   Ram #(
     .RAM_DEPTH(RAM_DEPTH),
     .WIDTH    (RAM_WIDTH),
-    .FILE     ("ram.hex")
+    .FILE     (FILE)
   ) inst_Ram (
     .clk          (clk),
     .clk_en       (clk_en),
