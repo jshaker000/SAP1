@@ -11,6 +11,8 @@ and I hope that this finds someone else who finds it useful as an introduction t
 The bench is written in C++ and is compiled using [Verilator](https://www.veripool.org/wiki/verilator).
 I used the bench to generate dumps and a front ponel with ncurses.
 
+For a more sophisticated design, see my [SAP2](https://github.com/jshaker000/SAP1).
+
 ## Theory of Operation
 
 Malvino's SAP 1 has several components
