@@ -97,7 +97,8 @@ module Instruction_Decoder (
                      SHOULD_NEVER_REACH :
                    // HALT PROGRAM
                    i_instruction == 4'h0f ?
-                     c_HLT :
+                     i_step == 'h2 ? c_HLT :
+                     SHOULD_NEVER_REACH :
                    // NOP - do nothing and just advance counter
                   i_step == 'h2 ? c_ADV : SHOULD_NEVER_REACH;
 endmodule
