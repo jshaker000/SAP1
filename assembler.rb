@@ -87,8 +87,8 @@ instructions         = []
 current_addr         = 0
 
 File.readlines(options.fetch(:input_file)).each_with_index do |l, i|
-  l.slice!(0..l.index(COMMENT_DELIMITER)-1) if l.match?(COMMENT_DELIMITER)
   l.strip!
+  l.slice!(0..l.index(COMMENT_DELIMITER)-1) if l.match?(COMMENT_DELIMITER)
   next if l.empty?
   l = l.split
   # we have a variable declaration
