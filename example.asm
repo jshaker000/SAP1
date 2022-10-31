@@ -7,12 +7,12 @@ INIT:
 LOOP:
   STA x
   ADD y
-  JIC HLT
+  JIC HALT
   OUT
   STA z
   LDA x
   STA y
   LDA z
   JMP LOOP
-HLT:
+HALT:
   HLT

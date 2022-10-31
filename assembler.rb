@@ -20,6 +20,7 @@
 #   Generating programs that are longer than the bounds of RAM are disallowed at compile time
 
 require 'optparse'
+require 'set'
 
 def s_to_i_find_base(s, allow_zero: true, msg: '')
   r = if h = s.match?(/^0?x(\h+)$/)
@@ -86,6 +87,8 @@ variables_table      = {}
 instructions         = []
 current_addr         = 0
 
+known_symbols = Set.new(OPS.keys + %i[RESERVE])
+
 File.readlines(options.fetch(:input_file)).each_with_index do |l, i|
   l.strip!
   l.slice!(0..l.index(COMMENT_DELIMITER)-1) if l.match?(COMMENT_DELIMITER)
@@ -103,26 +106,42 @@ File.readlines(options.fetch(:input_file)).each_with_index do |l, i|
       end
       if m = v.match(/(..*)\[(..*)\]/)
         n   = m[1].to_sym
+        if known_symbols.include?(n)
+          puts "Apparent variable #{n} on line #{i} cannot exist because it conflicts with known symbols"
+          exit 1
+        end
+        known_symbols << n
         len = s_to_i_find_base(m[2], allow_zero: false, msg: " Variable #{v} on line #{i}")
         variables_table.merge!({ n =>  { length: len, addr: nil } })
       else
         n   = v.to_sym
+        if known_symbols.include?(n)
+          puts "Apparent variable #{n} on line #{i} cannot exist because it conflicts with known symbols"
+          exit 1
+        end
+        known_symbols << n
         len = 1
         variables_table.merge!({ n =>  { length: len, addr: nil } })
       end
     end
     next
   end
-  # we have a symbol, add to symbol table
+  # we have a label, add to label table
   if l.size == 1 && l[0].end_with?(':')
     if l[0].start_with?(/\d/)
       puts "Apparent label #{l[0]} on line #{i} cannot start with a digit"
       exit 1
     end
-    labels_table.merge!({ l[0].slice(0...l[0].size-1).upcase.to_sym => current_addr })
+    label = l[0].slice(0...l[0].size-1).to_sym
+    if known_symbols.include?(label)
+      puts "Apparent label #{label} on line #{i} cannot exist because it conflicts with known symbols"
+      exit 1
+    end
+    known_symbols << label
+    labels_table.merge!({ label => current_addr })
     next
   end
-  op = l[0].upcase.to_sym
+  op = l[0].to_sym
   # we have an opcode
   if (o = OPS[op])
     if o.fetch(:argument)
@@ -175,7 +194,7 @@ end
 instructions.each.with_index do |instr, i|
   if instr.size == 2
     # Substitute labels
-    if (l = labels_table[instr[1].upcase.to_sym])
+    if (l = labels_table[instr[1].to_sym])
       instr[1] = l
     # Substitude variable addresses
     elsif (v = variables_table[instr[1].split('[').first.to_sym])
@@ -195,7 +214,7 @@ instructions.each.with_index do |instr, i|
       instr[1] = s_to_i_find_base(instr[1], msg: "Updating number in instruction #{instr}")
     end
     if instr[1] >= 2**ARG_BITS
-      puts "Argument for #{instr} cannot fit in than #{ARG_BITS}"
+      puts "Argument for #{instr} cannot fit in #{ARG_BITS}"
       exit 1
     end
   end
