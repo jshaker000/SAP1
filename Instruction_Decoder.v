@@ -15,7 +15,7 @@ module Instruction_Decoder (
   parameter  INSTRUCTION_WIDTH  = 4;
   parameter  INSTRUCTION_STEPS  = 8;
 
-  `include "instructions.vi"
+  `include "control_words.vi"
 
   localparam STEP_WIDTH = $clog2(INSTRUCTION_STEPS);
 

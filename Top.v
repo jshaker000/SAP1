@@ -27,7 +27,7 @@ module Top #(
   output wire [OUT_WIDTH-1:0] out_data
 );
 
-  `include "instructions.vi"
+  `include "control_words.vi"
 
 
 /*------------------BEGIN INTERCONNECTS----------------------------------*/

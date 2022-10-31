@@ -51,8 +51,14 @@ Its always an interesting decision to figure out how much you want to implement 
 The ALU will latch flags such as carry, zero, or overflow at the end of each of its operations. These are used for conditional instructions,
 such as JIZ (jump if zero). At least one conditional instruction is requried to make the machine turing complete.
 
-An example program is attached in "ram.hex.ex". Hopefully, by reading that an the InstructionDecode logic, and perhaps running some sims, this will help you
-understand how the machine understands and steps through instructions.
+An example program is attached in `example.asm`, and is automatically assembled by running `make` via `assembler.rb` to generate `ram.hex` unless that file already exists.
+Running make runs the program in `ram.hex` so you can write and assemble your own code there if desired. Note that the assembler currently does not automatically stay in sync
+with the `Instruction_Decoder.v` and will likely need edits if you need to update that file. These two files `assembler.rb` and `Instruction_Decoder.v` kind of show the brains of the
+computer, how it does it and what it does.
+
+The assembler file has a lot of comments explaining the valid syntax for it.
+
+The control words are defined in `control_words.vi` to be shared between other files as needed.
 
 ## Tweaks from Ben's Machine
 There are some modifications I made to make it more simulatable and easier for me to work with.
@@ -84,12 +90,10 @@ This means we dont have to fill each instruction with NOPs and waste cycles ther
 This is tested to work on major Linux distros. You will need to install Verilator, gcc, and
 ncurses (some distros will seperate into devel and non devel, you need the devel version).
 
-Currently, reading through `Instruction_Decoder.v` and grepping through for each `i_instruction` line is the
-best way to see the whole ISA. That, combined with some of the example programs, should help someone get started
-simulating.
+You will also need `ruby` installed to run the assembler, though I suppose it isnt technically needed if you dont
+mind hand writing machine code.
 
 From there, simply running *make* should be enough to verilate, build, and run your bench.
-You should place your RAM file in "ram.hex". I've left an example in the repo.
 
 The main bench is in *Top.cpp*. In the file you have the option to run in GUI mode, which lets you
 step the clock and view registers changing (its simplistic, but functional), and you have the option
@@ -116,9 +120,6 @@ You can make more benches and update the makefile appropriately if you like.
 Most of the design is parameterized so it should be pretty easy to exend bitwidths, etc. I'd love to
 see what you make but likely will leave this repo as the "base" computer.
 
-### Compiler
-I'd love to make some scripts that take plain text and can compile to both Instruction\_Decoder.v and also use that file
-to convert instructions into the ram file. Especially if we add a Stack, then having a compiler to automate function calling would be very nice
 
 ### Improve the GUI
 Right now the Ncurses interface is a bit of a hack, I'd love to clean it up or possibly do a full GUI with QT or SDL or something.
