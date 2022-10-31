@@ -2,7 +2,7 @@
 RESERVE x y z
 INIT:
   LDI 0
-  STA x
+  STA y
   LDI 1
 LOOP:
   STA x
