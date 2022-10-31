@@ -5,6 +5,11 @@
 # SYNTAX
 #   For comments use ; ie
 #     ; Multiplication subrouting
+#   For CONSTANTS use CONSTANT <NAME> <VALUE> ie
+#     CONSTANT FOO 3
+#     constants can be used as array indicies, array lengths, or in other general commands
+#     constants cannot start with digits
+#     right now all consatnts must have numbers on the other side, they cannot be composed
 #   For LABELS use <LABEL>:, ie
 #     START:
 #     Labels will be evaluated to a hardcoded address so then a command like JMP START will have START substituded back in
@@ -83,11 +88,12 @@ OptionParser.new do |opts|
 end.parse!
 
 labels_table         = {}
+constants_table      = {}
 variables_table      = {}
 instructions         = []
 current_addr         = 0
 
-known_symbols = Set.new(OPS.keys + %i[RESERVE])
+known_symbols = Set.new(OPS.keys + %i[RESERVE CONSTANT])
 
 File.readlines(options.fetch(:input_file)).each_with_index do |l, i|
   l.strip!
@@ -95,7 +101,7 @@ File.readlines(options.fetch(:input_file)).each_with_index do |l, i|
   next if l.empty?
   l = l.split
   # we have a variable declaration
-  if l[0].upcase == 'RESERVE'
+  if l[0] == 'RESERVE'
     if l.size == 1
       puts "RESERVE on line #{i} must have following arguments"
     end
@@ -111,7 +117,12 @@ File.readlines(options.fetch(:input_file)).each_with_index do |l, i|
           exit 1
         end
         known_symbols << n
-        len = s_to_i_find_base(m[2], allow_zero: false, msg: " Variable #{v} on line #{i}")
+        # Check if its a known constant
+        if (len = constants_table[m[2].to_sym])
+          nil
+        else
+          len = s_to_i_find_base(m[2], allow_zero: false, msg: " Variable #{v} on line #{i}")
+        end
         variables_table.merge!({ n =>  { length: len, addr: nil } })
       else
         n   = v.to_sym
@@ -124,6 +135,27 @@ File.readlines(options.fetch(:input_file)).each_with_index do |l, i|
         variables_table.merge!({ n =>  { length: len, addr: nil } })
       end
     end
+    next
+  end
+  # We have a constant declaration
+  if l[0] == 'CONSTANT'
+    if l.size != 3
+      puts "CONSTANT on line #{i} must have two arguments"
+      exit 1
+    end
+    c = l[1]
+    if c.start_with?(/\d/)
+      puts "Apparent constant #{c} on line #{i} cannot start with a digit"
+      exit 1
+    end
+    c = c.to_sym
+    if known_symbols.include?(c)
+      puts "Apparent constant #{c} on line #{i} cannot exist because it conflicts with known symbols"
+      exit 1
+    end
+    known_symbols << c
+    v = s_to_i_find_base(l[2], msg: " Constant #{c} on line #{i}")
+    constants_table.merge!({ c => v })
     next
   end
   # we have a label, add to label table
@@ -184,6 +216,9 @@ if options.fetch(:verbose)
   puts "labels table:"
   labels_table.each { |l, v| puts "#{l.to_s.rjust(10)}: #{v}" }
 
+  puts "constants table:"
+  constants_table.each { |l, v| puts "#{l.to_s.rjust(10)}: #{v}" }
+
   puts "variables table:"
   variables_table.each { |l, v| puts "#{l.to_s.rjust(10)}: #{v}" }
 
@@ -201,14 +236,21 @@ instructions.each.with_index do |instr, i|
       a   = v.fetch(:addr)
       len = v.fetch(:length)
       if m = instr[1].match(/\[(..*)\]/)
-        ix = s_to_i_find_base(m[1], allow_zero: true, msg: " Variable #{m} substitution on instruction #{instr}")
+        if (ix = constants_table[m[1].to_sym])
+          nil
+        else
+          ix = s_to_i_find_base(m[1], allow_zero: true, msg: " Variable #{m} substitution on instruction #{instr}")
+        end
         if ix >= len
-          puts "cannot index variable #{m} with length longer than its length of #{len} on instruction #{instr}"
+          puts "cannot index variable #{instr[1]} with length longer than its length of #{len} on instruction #{instr}"
           exit 1
         end
         a += ix
       end
       instr[1] = a
+    # substitute constants
+    elsif (c = constants_table[instr[1].to_sym])
+      instr[1] = c
     # update numbers
     else
       instr[1] = s_to_i_find_base(instr[1], msg: "Updating number in instruction #{instr}")
