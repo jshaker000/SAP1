@@ -10,6 +10,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <thread>
 
@@ -335,7 +336,7 @@ int main(int argc, char**argv)
         alu_data            = tb->Top->get_alu_data();
         out_data            = tb->Top->get_out_data();
         if (oregi) {
-          std::cout << "Out Register (dec): " << out_data << " at clk " << k-1 << std::endl;
+          std::cout << "Out Register update / hex: " << std::hex << std::setw(2) << out_data << " / dec: " << std::dec << std::setw(3) << out_data << " / clk " << k-1 << std::endl;
         }
         oregi        = tb->Top->get_oregi();
         if (use_gui)
@@ -449,7 +450,6 @@ int main(int argc, char**argv)
     {
         exit_code = 0;
         std::cerr << "Success: Simulation Terminated successfully at a HLT at clk " << k-1 << std::endl;
-        std::cerr << "Out Register (dec): " << out_data << std::endl;
     }
     else
     {
