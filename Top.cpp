@@ -188,6 +188,10 @@ int main(int argc, char**argv)
     int big_step_mode  = 0;
     int exit           = 0;
 
+    bool had_out_in = false;
+    std::uint64_t time_last_out_in;
+
+
     if (use_gui)
     {
         initscr();
@@ -336,7 +340,14 @@ int main(int argc, char**argv)
         alu_data            = tb->Top->get_alu_data();
         out_data            = tb->Top->get_out_data();
         if (oregi) {
-          std::cout << "Out Register update / hex: " << std::hex << std::setw(2) << out_data << " / dec: " << std::dec << std::setw(3) << out_data << " / clk " << k-1 << std::endl;
+          if (!had_out_in) {
+            std::cout << "Out Register update | hex: " << std::hex << std::setw(6) << out_data << " / dec: " << std::dec << std::setw(6) << out_data << " / clk " << std::setw(8) << k-1 << std::endl;
+            had_out_in = true;
+          }
+          else {
+            std::cout << "Out Register update | hex: " << std::hex << std::setw(6) << out_data << " / dec: " << std::dec << std::setw(6) << out_data << " / clk " << std::setw(8) << k-1 << " (" << std::setw(8) << k-1-time_last_out_in << " clks since last print)" << std::endl;
+          }
+          time_last_out_in = k-1;
         }
         oregi        = tb->Top->get_oregi();
         if (use_gui)
