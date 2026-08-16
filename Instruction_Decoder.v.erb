@@ -37,8 +37,8 @@ module Instruction_Decoder (
   assign o_control_word =
                  // Fetch, put prgm cntr in mem addr, fetch instruction, advance PC. All instructions start like this
                  // Also note, all instructions must end in a c_ADV to advance to the next instruction
-                 i_step == 'h0 ? c_MI | c_CO        :
-                 i_step == 'h1 ? c_RO | c_II | c_CE :
+                 i_step == 'h0 ? c_MI | c_CO | c_CE :
+                 i_step == 'h1 ? c_RO | c_II :
 <% (table - [nop_entry]).each do |e| -%>
                    // <%= e[:desc] %>
                    i_instruction == 4'h<%= format('%02x', e[:opcode]) %> ?
