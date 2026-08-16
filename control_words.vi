@@ -10,8 +10,8 @@
   localparam RI_POS  = 13; // ram data in
   localparam RO_POS  = 12; // ram data out
 
-  localparam II_POS  = 11; // instruction reg out
-  localparam IO_POS  = 10; // instruction reg in
+  localparam II_POS  = 11; // instruction reg in
+  localparam IO_POS  = 10; // instruction reg out
 
   localparam AI_POS  = 9; // a register in
   localparam AO_POS  = 8; // a register out

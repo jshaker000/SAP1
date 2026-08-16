@@ -22,7 +22,7 @@ module Bus #(
   input wire i_program_counter_out,
 
   input wire           [A_REG_OUT_WIDTH-1:0] i_a_reg_data,
-  input wire           [A_REG_OUT_WIDTH-1:0] i_b_reg_data,
+  input wire           [B_REG_OUT_WIDTH-1:0] i_b_reg_data,
   input wire             [ALU_OUT_WIDTH-1:0] i_alu_data,
   input wire             [RAM_OUT_WIDTH-1:0] i_ram_data,
   input wire [INSTRUCTION_REG_OUT_WIDTH-1:0] i_instruction_reg_data,
