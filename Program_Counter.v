@@ -13,7 +13,8 @@ module Program_Counter #(
   output wire [WIDTH-1:0] o_data
 );
 
-  reg    [WIDTH-1:0] counter = {WIDTH{1'b0}};
+  reg    [WIDTH-1:0] counter;
+  initial            counter = {WIDTH{1'b0}};
 
   wire   [WIDTH-1:0] counter_next   = i_load_enable    ? i_load_data :
                                       i_counter_enable ? counter + {{WIDTH-1{1'b0}}, 1'b1} :

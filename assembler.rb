@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 # Assembles machine code for the SAP1
-# Currently the OPCODE table here, unfortunately, can get out of sync with Instruction_Decoder.v
-# as there is no automated mechanism right now to generate one from the other
+# Uses opcode table from opcodes.rb
 # SYNTAX
 #   For comments use ; ie
 #     ; Multiplication subrouting
@@ -26,6 +25,7 @@
 
 require 'optparse'
 require 'set'
+require_relative 'opcodes'
 
 def s_to_i_find_base(s, allow_zero: true, msg: '')
   r = if h = s.match?(/^0?x(\h+)$/)
@@ -49,22 +49,12 @@ RAM_DEPTH          = 2**4
 COMMENT_DELIMITER  = ';'
 ARG_BITS           = 4
 
-OPS = {
-  NOP:  { opcode: 0x0, argument: false },
-  LDA:  { opcode: 0x1, argument: true },
-  ADD:  { opcode: 0x2, argument: true },
-  SUB:  { opcode: 0x3, argument: true },
-  LDI:  { opcode: 0x4, argument: true },
-  ADDI: { opcode: 0x5, argument: true },
-  SUBI: { opcode: 0x6, argument: true },
-  STA:  { opcode: 0x7, argument: true },
-  JMP:  { opcode: 0x8, argument: true },
-  JIZ:  { opcode: 0x9, argument: true },
-  JIC:  { opcode: 0xa, argument: true },
-  JIO:  { opcode: 0xb, argument: true },
-  OUT:  { opcode: 0xe, argument: false },
-  HLT:  { opcode: 0xf, argument: false },
-}
+# Built from the same table that generates Instruction_Decoder.v --
+# see opcodes.rb. This used to be a hand-maintained hash here, which is
+# exactly the kind of thing that drifts out of sync with the decoder.
+OPS = expand_opcode_table(OPCODE_TABLE).each_with_object({}) do |e, h|
+  h[e[:name]] = { opcode: e[:opcode], argument: e[:argument] }
+end
 
 options = {
   verbose:  false

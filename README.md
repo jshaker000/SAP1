@@ -52,9 +52,9 @@ The ALU will latch flags such as carry, zero, or overflow at the end of each of 
 such as JIZ (jump if zero). At least one conditional instruction is requried to make the machine turing complete.
 
 An example program is attached in `example.asm`, and is automatically assembled by running `make` via `assembler.rb` to generate `ram.hex` unless that file already exists.
-Running make runs the program in `ram.hex` so you can write and assemble your own code there if desired. Note that the assembler currently does not automatically stay in sync
-with the `Instruction_Decoder.v` and will likely need edits if you need to update that file. These two files `assembler.rb` and `Instruction_Decoder.v` kind of show the brains of the
-computer, how it does it and what it does.
+Running make runs the program in `ram.hex` so you can write and assemble your own code there if desired.
+`opcodes.rb` is used as a source of truth both for `assember.rb` (via dynamic loading), and `Instruction_Decoder.v` (via code generation, through loading the template
+via `Instruction_Decoder.v.erb`). `OPCODES.txt` is also generated as an easy-to-udnerstand table of the available codes.
 
 The assembler file has a lot of comments explaining the valid syntax for it.
 
@@ -119,6 +119,8 @@ You can make more benches and update the makefile appropriately if you like.
 ### Extending to 16 bits and beyond
 Most of the design is parameterized so it should be pretty easy to exend bitwidths, etc. I'd love to
 see what you make but likely will leave this repo as the "base" computer.
+
+(This is done and is now in my SAP-2 project)
 
 
 ### Improve the GUI

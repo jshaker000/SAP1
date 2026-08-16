@@ -1,0 +1,52 @@
+// AUTO-GENERATED FILE. DO NOT EDIT BY HAND.
+// Generated from opcodes.rb by gen_decoder.rb -- edit opcodes.rb and
+// Instruction_Decoder.v.erb instead, then re-run `make Instruction_Decoder.v`.
+//
+// Combinational module that takes program counter and instruction and ALU
+// flags and produces control logic
+
+`default_nettype none
+
+module Instruction_Decoder (
+  i_instruction,
+  i_step,
+  i_zero,
+  i_carry,
+  i_odd,
+  o_control_word
+);
+
+  parameter  INSTRUCTION_WIDTH  = 4;
+  parameter  INSTRUCTION_STEPS  = 8;
+
+  `include "control_words.vi"
+
+  localparam STEP_WIDTH = $clog2(INSTRUCTION_STEPS);
+
+  localparam                    [0:0] X_NOT_ZERO_FOR_SHOULD_NEVER_REACH = 1'b0;
+  localparam [CONTROL_WORD_WIDTH-1:0] SHOULD_NEVER_REACH                = {CONTROL_WORD_WIDTH{X_NOT_ZERO_FOR_SHOULD_NEVER_REACH ? 1'bx : 1'b0}};
+  localparam [CONTROL_WORD_WIDTH-1:0] ZERO_CW                           = {CONTROL_WORD_WIDTH{1'b0}};
+
+  input wire     [INSTRUCTION_WIDTH-1:0] i_instruction;
+  input wire            [STEP_WIDTH-1:0] i_step;
+  input wire                             i_zero;
+  input wire                             i_odd;
+  input wire                             i_carry;
+  output wire   [CONTROL_WORD_WIDTH-1:0] o_control_word;
+
+  assign o_control_word =
+                 // Fetch, put prgm cntr in mem addr, fetch instruction, advance PC. All instructions start like this
+                 // Also note, all instructions must end in a c_ADV to advance to the next instruction
+                 i_step == 'h0 ? c_MI | c_CO        :
+                 i_step == 'h1 ? c_RO | c_II | c_CE :
+<% (table - [nop_entry]).each do |e| -%>
+                   // <%= e[:desc] %>
+                   i_instruction == 4'h<%= format('%02x', e[:opcode]) %> ?
+<% e[:steps].sort.each do |step, data| -%>
+                     i_step == 'h<%= step.to_s(16) %> ? <%= render_step(data) %> :
+<% end -%>
+                     SHOULD_NEVER_REACH :
+<% end -%>
+                   // <%= nop_entry[:desc] %>
+                  i_step == 'h2 ? <%= render_step(nop_entry[:steps][2]) %> : SHOULD_NEVER_REACH;
+endmodule

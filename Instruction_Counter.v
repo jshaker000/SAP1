@@ -13,7 +13,8 @@ module Instruction_Counter #(
 
   output wire [STEP_WIDTH-1:0] o_data
 );
-  reg    [STEP_WIDTH-1:0] counter = {STEP_WIDTH{1'b0}};
+  reg    [STEP_WIDTH-1:0] counter;
+  initial counter = {STEP_WIDTH{1'b0}};
 
   wire counter_max    = counter == (INSTRUCTION_STEPS[STEP_WIDTH-1:0] - 'd1);
   wire update_counter = clk_en & ~i_halt;

@@ -339,7 +339,7 @@ int main(int argc, char**argv)
         b_reg               = tb->Top->get_b_reg();
         alu_data            = tb->Top->get_alu_data();
         out_data            = tb->Top->get_out_data();
-        if (oregi) {
+        if (oregi && !use_gui) {
           if (!had_out_in) {
             std::cout << "Out Register update | hex: " << std::hex << std::setw(6) << out_data << " / dec: " << std::dec << std::setw(6) << out_data << " / clk " << std::setw(8) << k-1 << std::endl;
             had_out_in = true;
