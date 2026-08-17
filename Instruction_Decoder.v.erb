@@ -42,9 +42,9 @@ module Instruction_Decoder (
 <% (table - [nop_entry]).each do |e| -%>
                    // <%= e[:desc] %>
                    i_instruction == 4'h<%= format('%02x', e[:opcode]) %> ?
-<% e[:steps].sort.each do |step, data| -%>
+  <% e[:steps].sort.each do |step, data| -%>
                      i_step == 'h<%= step.to_s(16) %> ? <%= render_step(data) %> :
-<% end -%>
+  <% end -%>
                      SHOULD_NEVER_REACH :
 <% end -%>
                    // <%= nop_entry[:desc] %>
