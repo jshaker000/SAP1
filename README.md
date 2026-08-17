@@ -55,6 +55,7 @@ An example program is attached in `example.asm`, and is automatically assembled 
 Running make runs the program in `ram.hex` so you can write and assemble your own code there if desired.
 `opcodes.rb` is used as a source of truth both for `assember.rb` (via dynamic loading), and `Instruction_Decoder.v` (via code generation, through loading the template
 via `Instruction_Decoder.v.erb`). `OPCODES.txt` is also generated as an easy-to-udnerstand table of the available codes.
+If `opcodes.rb` changes, reassembly is required.
 
 The assembler file has a lot of comments explaining the valid syntax for it.
 

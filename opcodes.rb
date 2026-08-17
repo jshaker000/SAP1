@@ -5,11 +5,12 @@
 #   * assembler.rb requires this file directly to build its OPS table.
 #   * gen_decoder.rb requires this file to render Instruction_Decoder.v.erb
 #     into Instruction_Decoder.v.
+# Note that changes to this file require re-assembling
 #
 # Step 0 and step 1 are the universal instruction fetch and are emitted
 # by the generator itself, not listed per-opcode:
-#   step 0: MI CO         (memory_address <= PC)
-#   step 1: RO II CE      (instruction <= RAM[memory_address], PC <= PC+1)
+#   step 0: MI CO CE      (memory_address <= PC)
+#   step 1: RO II         (instruction <= RAM[memory_address], PC <= PC+1)
 
 # Must match the INSTRUCTION_STEPS parameter default in Top.v /
 # Instruction_Decoder.v -- there's no automated link between the two, this
